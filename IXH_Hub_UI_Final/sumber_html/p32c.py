@@ -1,0 +1,74 @@
+from tourkit import *
+import lib, icons, re
+icons.P['chat']=['M7.9 20A9 9 0 1 0 4 16.1L2 22Z']
+lib.CSS+='''
+.tt{width:100%;border-collapse:collapse;font-size:10.5px}
+.tt th{text-align:left;font-size:9.5px;color:#6B6458;font-weight:600;padding:0 6px 5px;border-bottom:1.5px solid #1C1B1F}
+.tt td{padding:5px 6px;border-bottom:1.2px dashed #EADFC2;vertical-align:middle;line-height:1.4}
+.tt tr:last-child td{border:0}.tt b{font-weight:700}.tt td.c,.tt th.c{text-align:center}
+.srch{display:flex;gap:8px;align-items:center;margin-bottom:8px;background:#fff;border:1.2px solid #EADFC2;border-radius:12px;padding:9px 12px;font-size:11.5px;color:#6B6458}
+.srch.on{border:2px solid #1C1B1F;color:#1C1B1F;box-shadow:0 2px 0 #1C1B1F}
+.caret{display:inline-block;width:1.5px;height:13px;background:#1C1B1F;vertical-align:-2px;margin-left:1px}
+.topc{display:inline-block;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;background:#fff;border:1.2px solid #1C1B1F;margin:0 4px 5px 0}
+.topc.on{background:#FFC928;border:2px solid #1C1B1F;font-weight:700}
+'''
+def hrow(ic,t,d,chip=''): return f'<div class="card" style="padding:7px 10px;margin-bottom:5px"><div class="row sp"><div class="row"><div class="ic" style="width:30px;height:30px">[[{ic}]]</div><div><div class="t1">{t}</div><div class="t3">{d}</div></div></div>{chip or "<span style=\'font-size:15px\'>[[chev]]</span>"}</div></div>'
+def step(n,t): return f'<div class="lrow"><span class="num">{n}</span><div class="t2" style="color:#1C1B1F">{t}</div></div>'
+def btnrow(ic,t,d): return f'<div class="lrow"><div class="ic" style="width:30px;height:30px">[[{ic}]]</div><div><div class="t1">{t}</div><div class="t3">{d}</div></div></div>'
+def hl(t,q): return re.sub('('+re.escape(q)+')',r'<mark style="background:#FFEBA8;border-radius:3px;padding:0 1px;color:inherit">\1</mark>',t,flags=re.I)
+cA='<span class="chip cb">Admin</span>'; cAP='<span class="chip cb">Admin & Pengurus</span>'; cV='<span class="chip cx">Lihat saja</span>'
+UL='<div class="btn pri" style="margin:0 0 10px">[[play]] Ulangi Tur Aplikasi</div>'
+SRCH='<div class="srch">[[search]] Cari fitur atau tombol</div>'
+def contact(name='Ahmad Ramadhan'): return f'<div class="card" style="background:#FFEBA8;border:1.5px solid #1C1B1F;margin-top:6px"><div class="row"><div class="ic" style="width:32px;height:32px;background:#fff">[[chat]]</div><div><div class="t1">Belum ketemu jawabannya?</div><div class="t3" style="color:#3d392f">Tanya langsung ke Admin kelas</div></div></div><div class="btn sec" style="margin-top:8px;height:36px">[[chat]] Hubungi Admin ({name})</div></div>'
+# 1-3 Pusat Bantuan per role
+s1=phone('1. Bantuan Admin',bar('Bantuan')+SRCH+UL+'<div class="lbl" style="margin-top:0">Panduan Fitur</div>'
+  +hrow('check','Absensi','Catat dan lihat kehadiran siswa')+hrow('wallet','Kas','Pemasukan, pengeluaran, dan laporan')+hrow('mail','Tagihan Kas','Tagih kas lewat WhatsApp')+hrow('cal','Jadwal & Tugas','Pelajaran, PR, dan pengingat')+hrow('mega','Pengumuman','Kabar resmi untuk kelas')+hrow('bot','Panel Bot & Bot WhatsApp','Pesan otomatis ke siswa',cA)+hrow('users','Kelola Pengguna','Role, reset password, cek nomor',cA)+hrow('history','Log Aktivitas','Jejak perubahan data',cA)
+  +'<div class="t3" style="text-align:center;margin-top:4px">Hanya fitur sesuai role kamu yang ditampilkan</div>')
+s2=phone('2. Bantuan Pengurus',bar('Bantuan')+SRCH+UL+'<div class="lbl" style="margin-top:0">Panduan Fitur</div>'
+  +hrow('check','Absensi','Catat dan lihat kehadiran siswa')+hrow('wallet','Kas','Pemasukan, pengeluaran, dan laporan')+hrow('mail','Tagihan Kas','Tagih kas lewat WhatsApp')+hrow('cal','Jadwal & Tugas','Pelajaran, PR, dan pengingat')+hrow('mega','Pengumuman','Kabar resmi untuk kelas')+hrow('bot','Panel Bot','Kirim laporan dan tagihan')
+  +contact())
+siswa_list=(hrow('chart','Kehadiranku','Rekap, kalender, dan riwayat hadirmu')+hrow('wallet','Tagihanku','Tagihan kas, cara bayar, dan bukti')+hrow('check','Absensi & Kas','Hanya untuk dilihat',cV)+hrow('cal','Jadwal & Tugas','Pelajaran, PR, dan pengingat')+hrow('mega','Pengumuman','Kabar resmi untuk kelas',cV)+hrow('chat','Pesan WhatsApp','Bot, kalimat "tagihan kas saya", STOP/MULAI'))
+s3=phone('3. Bantuan Siswa',bar('Bantuan')+SRCH+UL+'<div class="lbl" style="margin-top:0">Panduan Fitur</div>'+siswa_list+contact())
+# 4 pencarian
+def res(t,d,q): return f'<div class="card" style="padding:7px 10px;margin-bottom:5px"><div class="row sp"><div><div class="t1">{hl(t,q)}</div><div class="t3">{d}</div></div><span style="font-size:15px">[[chev]]</span></div></div>'
+q='tagih'
+s4=phone('4. Pencarian: Ada Hasil',bar('Bantuan')+f'<div class="srch on">[[search]] <span style="flex:1">{q}<i class="caret"></i></span><span>[[x]]</span></div>'
+  +'<div class="lbl" style="margin-top:0">Fitur (1)</div>'+res('Tagihan Kas','Tagih kas lewat WhatsApp',q)
+  +'<div class="lbl">Tombol & istilah (4)</div>'+res('Buat Tagihan','Di Tagihan Kas • membuat tagihan periode baru',q)+res('Kelola Tagihan','Di Kas, tab Tagihan • status per siswa',q)+res('Salin Pesan Tagihan','Di Tagihan Kas • kirim manual bila bot gagal',q)+res('Arti Status Tagihan','Ikon info • Lunas, Belum, Tunggakan',q)
+  +'<div class="t3" style="text-align:center;margin-top:6px">Menampilkan hasil sesuai role Pengurus</div>')
+# 5 kosong
+q2='ajukan izin'
+s5=phone('5. Pencarian: Hasil Kosong',bar('Bantuan')+f'<div class="srch on">[[search]] <span style="flex:1">{q2}<i class="caret"></i></span><span>[[x]]</span></div>'
+  +f'<div style="text-align:center;padding-top:14px">{blob("sad",96)}<div style="font-weight:800;font-size:14.5px;margin-top:4px">Tidak ada hasil</div><div class="t2" style="margin:3px 8px 10px;line-height:1.5">Kami tidak menemukan "{q2}". Coba kata lain yang lebih singkat.</div></div>'
+  +'<div class="lbl" style="text-align:center">Coba cari</div><div style="text-align:center"><span class="topc">tagihan</span><span class="topc">kehadiran</span><span class="topc">tugas</span><span class="topc">jadwal</span></div>'
+  +contact())
+# 6-10 penjelasan fitur
+def expl(ic,title,chips,fungsi,steps,btns,cta):
+    return (bar(title)+f'<div class="row" style="margin-bottom:6px"><div class="ic" style="width:38px;height:38px;background:#FFC928;border:2px solid #1C1B1F">[[{ic}]]</div><div><div style="font-weight:800;font-size:14px">{title}</div>{chips}</div></div>'
+     +'<div class="lbl">Fungsinya</div><div class="card" style="font-size:10.5px;line-height:1.5;padding:8px 11px">'+fungsi+'</div>'
+     +'<div class="lbl">Cara pakai</div><div class="card" style="padding:2px 11px">'+''.join(step(i+1,s) for i,s in enumerate(steps))+'</div>'
+     +'<div class="lbl">Tombol di layar ini</div><div class="card" style="padding:2px 11px">'+''.join(btnrow(*b) for b in btns)+'</div>'
+     +f'<div class="btn pri" style="margin-top:6px">{cta}</div>')
+s6=phone('6. Penjelasan: Absensi',expl('check','Absensi',cAP+' <span class="chip cx">Siswa: lihat saja</span>','Mencatat kehadiran siswa setiap hari: hadir, izin, sakit, atau alpha. Hasilnya jadi rekap Kehadiranku tiap siswa.',['Buka Absensi; semua siswa awalnya Hadir','Ketuk huruf untuk mengubah status siswa','Simpan, lalu konfirmasi'],[('check','Huruf H, I, S, A','Mengubah status satu siswa'),('checkc','Simpan Absensi','Menyimpan setelah konfirmasi'),('download','Riwayat & Ekspor','Lihat hari lalu, unduh PDF atau Excel')],'Buka Absensi'))
+s7=phone('7. Penjelasan: Kas',expl('wallet','Kas',cAP+' <span class="chip cx">Siswa: lihat saja</span>','Mencatat pemasukan dan pengeluaran kas kelas, dan memantau saldo yang sudah terkonfirmasi.',['Cek saldo dan transaksi terbaru','Tambah pengeluaran dengan foto bukti','Unduh laporan PDF atau Excel'],[('plus','Tambah Transaksi','Pemasukan dari tagihan tercatat otomatis'),('wallet','Tab Tagihan','Pantau siapa yang sudah bayar'),('download','Unduh Laporan','Format PDF atau Excel')],'Buka Kas'))
+s8=phone('8. Penjelasan: Jadwal & Tugas',expl('cal','Jadwal & Tugas','<span class="chip cg">Semua role</span>','Melihat jadwal pelajaran dan daftar tugas lengkap dengan deadline dan pengingat malam hari.',['Pilih hari di Jadwal','Ketuk pelajaran untuk mengatur pengingat','Buka Tugas, tandai selesai bila sudah dikerjakan'],[('bell','Atur Pengingat','Ingatkan buku dan tugas untuk besok'),('plus','Tombol + di Tugas','Tambah tugas, khusus Admin & Pengurus'),('checkc','Tandai Selesai','Menandai tugas sudah dikerjakan')],'Buka Jadwal'))
+s9=phone('9. Penjelasan: Tagihanku',expl('wallet','Tagihanku','<span class="chip cg">Siswa</span>','Menampilkan tagihan kas milikmu, jatuh tempo, dan riwayat pembayaran. Hanya data milikmu yang tampil.',['Cek nominal dan jatuh tempo','Bayar tunai ke bendahara atau transfer','Kirim bukti, tunggu konfirmasi'],[('send','Kirim Bukti Pembayaran','Membuka WhatsApp untuk kirim foto bukti'),('info','Status Belum bayar / Lunas','Berubah setelah bendahara konfirmasi'),('history','Riwayat tagihan','Semua tagihan sebelumnya')],'Buka Tagihanku'))
+s10=phone('10. Penjelasan: Bot WhatsApp',expl('bot','Bot WhatsApp','<span class="chip cb">Admin</span>','Mengirim tagihan dan laporan otomatis ke WhatsApp siswa lewat nomor bot, dengan jeda acak antar pesan.',['Hubungkan nomor bot lewat QR atau kode pairing','Atur batas kirim 60 per jam dan template','Pantau status, kirim ulang yang gagal'],[('qr','Hubungkan Ulang','QR atau kode pairing 8 karakter'),('mail','Template Pesan','Ubah isi pesan; Balas STOP terkunci'),('refresh','Kirim Ulang yang Gagal','Hanya ke nomor yang gagal')],'Buka Pengaturan Bot'))
+# 11 sheet Hubungi Admin
+s11=phone('11. Hubungi Admin',bar('Bantuan')+SRCH+UL+'<div class="lbl" style="margin-top:0">Panduan Fitur</div>'+siswa_list+contact(),
+  over=dim+'<div class="sheet"><div style="width:40px;height:4px;border-radius:2px;background:#EADFC2;margin:0 auto 8px"></div><div class="row sp"><div style="font-weight:800;font-size:14px">Hubungi Admin</div><span class="chip cb">Siswa</span></div><div class="t3" style="margin-bottom:6px">Ahmad Ramadhan • Admin kelas IX-H</div>'
+  +'<div class="lbl" style="margin-top:2px">Topik</div><div><span class="topc">Tidak bisa login</span><span class="topc on">Tagihan salah</span><span class="topc">Absensi salah</span><span class="topc">Lainnya</span></div>'
+  +'<div class="lbl">Pesan yang akan dikirim</div><div class="wa"><div class="bub">Halo Kak Ahmad, saya Citra Lestari (Siswa IX-H). Saya butuh bantuan soal: <b>Tagihan salah</b>.<br>Dikirim dari Bantuan IX-H Hub.</div></div>'
+  +'<div class="t3" style="margin:4px 0 0">Pesan terisi otomatis dan bisa kamu ubah di WhatsApp.</div><div class="btn pri">[[send]] Buka WhatsApp</div><div class="btn sec">[[copy]] Salin Pesan</div></div>')
+# 12 WhatsApp pratinjau
+s12=phone('12. WhatsApp: Pesan Siap Kirim','<div style="margin:0 -12px;background:#0F6B5C;color:#fff;padding:8px 12px;display:flex;gap:10px;align-items:center"><span>[[back]]</span><div class="ic" style="width:30px;height:30px;background:#FFC928;color:#1C1B1F;font-size:10px;font-weight:800">AR</div><div><div style="font-size:12.5px;font-weight:600">Ahmad Ramadhan</div><div style="font-size:9.5px;opacity:.85">Admin IX-H</div></div></div>'
+  '<div style="margin:0 -12px;background:#EADFC8;height:510px;padding:12px"><div style="text-align:center"><span class="chip cx" style="background:#fff">Rabu, 4 Nov</span></div><div class="t3" style="text-align:center;margin-top:10px">Belum ada pesan. Tekan kirim untuk menghubungi Admin.</div></div>'
+  '<div style="position:absolute;left:0;right:0;bottom:0;background:#EADFC8;padding:8px 10px 14px;display:flex;gap:8px;align-items:flex-end"><div style="flex:1;background:#fff;border-radius:18px;padding:9px 12px;font-size:10.5px;line-height:1.5">Halo Kak Ahmad, saya Citra Lestari (Siswa IX-H). Saya butuh bantuan soal: Tagihan salah.<br>Dikirim dari Bantuan IX-H Hub.</div><div style="width:38px;height:38px;border-radius:50%;background:#0F6B5C;color:#fff;display:flex;align-items:center;justify-content:center;flex:none">[[send]]</div></div>')
+# tabel & aturan
+Y='<span class="chip cg">Ya</span>';V='<span class="chip cb">Lihat saja</span>';N='<span class="chip cx">–</span>'
+ROWS=[('Absensi',Y,Y,V),('Kas',Y,Y,V),('Tagihan Kas',Y,Y,N),('Kehadiranku',N,N,Y),('Tagihanku',N,N,Y),('Jadwal & Tugas',Y,Y,Y),('Pengumuman',Y,Y,V),('Panel Bot',Y,Y,N),('Bot WhatsApp (pengaturan, template)',Y,N,N),('Pesan WhatsApp (jabat tangan, STOP/MULAI)',N,N,Y),('Kelola Pengguna',Y,N,N),('Log Aktivitas',Y,N,N),('Hubungi Admin',N,Y,Y)]
+body=''.join(f'<tr><td><b>{a}</b></td><td class="c">{b}</td><td class="c">{c}</td><td class="c">{d}</td></tr>' for a,b,c,d in ROWS)+'<tr><td><b>Jumlah panduan</b></td><td class="c"><b>9</b></td><td class="c"><b>6</b></td><td class="c"><b>6</b></td></tr>'
+tb=f'<div style="grid-column:span 2;padding:0 20px 0 0"><div class="rules"><h3 style="display:flex;gap:8px;align-items:center">Isi Pusat Bantuan per Role <span class="chip cy">mengikuti Matriks Hak Akses (00)</span></h3><table class="tt"><tr><th>Panduan</th><th class="c">Admin</th><th class="c">Pengurus</th><th class="c">Siswa</th></tr>{body}</table></div></div>'
+R=rules(['Bantuan dibuka dari <b>Profil > Bantuan</b> atau tombol akun. Isinya mengikuti role; fitur yang tidak boleh dipakai role itu tidak ditampilkan, dan yang hanya boleh dilihat diberi label <b>Lihat saja</b>.','Tiap panduan memuat <b>Fungsinya</b>, <b>Cara pakai</b> (maksimal 3 langkah), dan <b>Tombol di layar ini</b> (maksimal 3), chip peran, dan tombol <b>Buka</b> yang langsung menuju fitur.','Pencarian mulai dari <b>2 huruf</b>, tidak peka huruf besar-kecil, mencari judul fitur, nama tombol, dan istilah (mis. Tunggakan). Hasil dikelompokkan <b>Fitur</b> dan <b>Tombol & istilah</b>, maksimal 8, huruf yang cocok disorot kuning, dan hanya yang sesuai role. Tombol x mengosongkan kolom.','Hasil kosong: pesan <b>Tidak ada hasil</b>, tiga sampai empat kata saran sesuai role, dan kartu Hubungi Admin. Fitur yang dibatalkan (mis. Ajukan Izin) tidak pernah muncul.','<b>Hubungi Admin</b> hanya untuk Pengurus dan Siswa; Admin tidak punya tombol ini. Nama Admin diambil dari pengguna ber-role Admin (Ahmad Ramadhan).','Hubungi Admin membuka <b>WhatsApp dengan pesan terisi</b> (nama, role, kelas, topik) ke nomor Admin. Pesan <b>tidak dikirim otomatis</b>; pengguna menekan kirim sendiri. Bila WhatsApp tidak terpasang, pakai <b>Salin Pesan</b>.','Teks panduan berasal dari <b>satu berkas string per role</b>. Pusat Bantuan dan pencarian dapat dibuka tanpa internet; hanya Hubungi Admin yang butuh WhatsApp.','Ringan: tanpa blur; daftar tanpa animasi di perangkat RAM 2 GB atau kurang.'],span=2)
+html=page('Pengenalan Aplikasi: Pusat Bantuan','Pencarian • hasil kosong • tampilan per role • penjelasan fitur • Hubungi Admin',[tb,R,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12])
+render(html,'/home/claude/w32c/32c_pusat_bantuan.jpg','32c_pusat_bantuan')

@@ -1,0 +1,65 @@
+
+.lg{width:30px;height:30px;border-radius:10px;background:#FFC928;border:2px solid #1C1B1F;font-weight:800;font-size:8.5px;display:flex;align-items:center;justify-content:center}
+.rl{background:#FFC928;border:1.5px solid #1C1B1F;border-radius:12px;padding:1px 9px;font-size:8.5px;font-weight:700}
+.circ{width:30px;height:30px;border-radius:50%;background:#FFF9E8;border:1.5px solid #1C1B1F;display:flex;align-items:center;justify-content:center;position:relative;font-size:13px;flex:none}
+.circ.y{background:#FFC928;border-width:2px}
+.bd{position:absolute;top:-4px;right:-4px;background:#D94452;color:#fff;border-radius:8px;font-size:7.5px;padding:0 4px;font-style:normal;font-weight:700;line-height:12px}
+.hello{background:#FFC928;border:2px solid #1C1B1F;border-radius:16px;box-shadow:0 3px 0 #1C1B1F;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tile{background:#fff;border:1.5px solid #EADFC2;border-radius:14px;padding:5px 3px 8px;text-align:center;font-size:9.5px;font-weight:500;line-height:1.25}
+.tile .ic{margin:0 auto 2px;width:26px;height:26px;font-size:12px}
+.cmpt .card{margin-bottom:6px}.cmpt .al{margin-bottom:6px}.cmpt .hello{margin-bottom:6px;padding:8px 12px}
+.mb{display:inline-block;background:#D94452;color:#fff;border-radius:8px;font-size:6.8px;padding:0 5px;font-weight:700}
+.pb{height:6px;background:#EFE8D6;border-radius:4px;overflow:hidden}.pb i{display:block;height:100%;background:#2E9B5A;border-radius:4px}
+.card.tint{background:#FFEBA8;border-color:#EADFC2}
+.card.sel{border:2px solid #1C1B1F;box-shadow:0 3px 0 #1C1B1F}
+.rad{width:20px;height:20px;border-radius:50%;border:2px solid #1C1B1F;background:#fff;display:flex;align-items:center;justify-content:center;flex:none;font-size:11px}
+.rad.on{background:#FFC928}
+.wb{width:30px;height:44px;border-radius:8px}.wb.g{background:#2E9B5A}.wb.t{background:#FFC928;border:2px solid #1C1B1F}.wb.e{background:#F1EAD6}
+.nav2{position:absolute;left:0;right:0;bottom:0;height:60px;background:#FFF9E8;border-top:1px solid #EADFC2;display:flex;justify-content:space-around;align-items:center;z-index:5}
+.nv{display:flex;flex-direction:column;align-items:center;gap:1px;font-size:8.5px;color:#6B6458;padding:4px 10px;border-radius:18px;border:2px solid transparent}
+.nv svg{width:16px;height:16px}
+.nv.on{background:#FFC928;border-color:#1C1B1F;color:#1C1B1F;font-weight:700}
+.toast{position:absolute;left:12px;right:12px;top:34px;z-index:12;background:#1C1B1F;color:#fff;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:10.5px}
+.pv{border-radius:16px;padding:10px}
+.cmpg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmpg .p{border-radius:14px;padding:8px;min-height:50px;display:flex;align-items:center;justify-content:center}
+.pvn{background:#FFF9E8;border:1.5px solid #EADFC2}
+.mini{width:58px;height:78px;border-radius:12px;padding:6px;flex:none;position:relative}
+
+/* ===== Liquid Glass ENTENG: isi datar, kaca hanya di lapisan melayang (navigasi, pesan) ===== */
+.ph.glass,.pvg{background:#FFF9E8}
+.glass .card,.glass .tile{background:#fff;border:1px solid #F1E8CC;border-radius:18px;box-shadow:0 1px 2px rgba(120,90,0,.08)}
+.glass .card.tint{background:#FFF0B8}
+.glass .card.sel{border:2px solid #FFC928;box-shadow:0 0 0 3px rgba(255,201,40,.28)}
+.glass .ic{background:#FFEBA8;border:0}
+.glass .lg,.glass .rl,.glass .circ.y{background:#FFC928;border:0}
+.glass .circ{background:#fff;border:1px solid #F1E8CC}
+.glass .hello{background:#FFC928;border:0;border-radius:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}
+.glass .pri{background:#FFC928;border:0;border-radius:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 4px rgba(200,140,0,.25)}
+.glass .sec{background:#fff;border:1px solid #F1E8CC;border-radius:16px}
+.glass .inp{background:#fff;border:1px solid #F1E8CC;border-radius:16px}
+.glass .tabs{background:#F4ECD6;border-radius:16px}
+.glass .tabs .on{background:#fff;border:0;border-radius:13px;box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.glass .chip{border:0}
+.glass .al{border-width:1px;border-radius:16px}
+.glass .tog{background:#FFC928;border:0}
+.glass .tog:after{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.glass .tog.off{background:#E4DCC6;border:0}
+.glass .tog.off:after{background:#fff}
+.glass .rad{border:1.5px solid #D9CFB2;background:#fff}
+.glass .rad.on{background:#FFC928;border-color:#FFC928}
+.glass .pb{background:#F1EAD6}
+.glass .wb.t{border:0;background:#FFC928}
+.glass .wb.e{background:#F1EAD6}
+.glass .t3,.glass .t2{color:#5A5448}
+/* satu-satunya blur permanen: bilah navigasi melayang; blur kecil, statis */
+.glass .nav2{left:10px;right:10px;bottom:10px;height:58px;border-radius:29px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);box-shadow:0 4px 14px rgba(120,90,0,.16),inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4)}
+.glass .nv{border:1px solid transparent;color:#4F493D}
+.glass .nv.on{background:linear-gradient(180deg,rgba(255,226,110,.95),rgba(255,196,30,.9));border-color:#fff;box-shadow:inset 0 1px 0 #fff;color:#1C1B1F}
+/* blur sementara: pesan singkat */
+.glass .toast{background:rgba(28,27,31,.72);border:1px solid rgba(255,255,255,.3);border-radius:22px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+/* perangkat ringan: tanpa blur sama sekali */
+.glass.solid *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.glass.solid .nav2{background:#fff;border:1px solid #F1E8CC;box-shadow:0 2px 6px rgba(120,90,0,.12)}
+.glass.solid .nv.on{background:#FFC928;border-color:#FFC928;box-shadow:none}
+.glass.solid .toast{background:#1C1B1F;border:0}

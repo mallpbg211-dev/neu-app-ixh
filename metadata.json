@@ -1,0 +1,6 @@
+{
+  "name": "IX-H HUB 1.0",
+  "description": "Aplikasi manajemen kelas IX-H Spensari untuk jadwal pelajaran, tugas & PR, jadwal piket, kas kelas, dan direktori siswa dengan desain Soft Neubrutalism penuh warna.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
