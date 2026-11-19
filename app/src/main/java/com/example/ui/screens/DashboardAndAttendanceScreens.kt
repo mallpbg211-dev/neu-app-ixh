@@ -69,7 +69,9 @@ import com.example.ui.components.IxhDonutChart
 import com.example.ui.components.IxhDualToneSystemIcon
 import com.example.ui.components.IxhEmptyStateCard
 import com.example.ui.components.IxhOrganicGreetingCard
+import com.example.ui.components.IxhOrganicModuleBanner
 import com.example.ui.components.IxhPrimaryButton
+import com.example.ui.components.IxhSculptedSectionHeader
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhStatusChip
 import com.example.ui.components.IxhSubScreenTopBar
@@ -77,6 +79,7 @@ import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.IxhTopBrandHeader
 import com.example.ui.components.MainNavTab
 import com.example.ui.components.formatRupiah
+import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhAmber
 import com.example.ui.theme.IxhAmberBg
 import com.example.ui.theme.IxhBlue
@@ -202,98 +205,131 @@ fun DashboardScreen(
                         .weight(1f)
                         .testTag("dashboard_attendance_summary_card"),
                     hasHardShadow = true,
+                    contentPadding = PaddingValues(0.dp),
                     onClick = { onSelectMainTab(MainNavTab.ABSENSI) }
                 ) {
+                    // Sculpted Top Header Band
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(IxhYellowLight)
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "KEHADIRAN HARI INI",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = IxhTextSecondary
-                        )
-                        IxhDualToneSystemIcon(iconType = IxhSystemIconType.ABSENSI, size = 20.dp)
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = "$presentCount / $totalStudents",
-                            style = MaterialTheme.typography.headlineSmall,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = IxhInk
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = attendancePctLabel,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = if (presentCount > 0) IxhGreen else IxhTextSecondary,
-                            fontWeight = FontWeight.ExtraBold
-                        )
+                        IxhDualToneSystemIcon(iconType = IxhSystemIconType.ABSENSI, size = 20.dp)
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LinearProgressIndicator(
-                        progress = { attendanceProgress },
+                    Box(modifier = Modifier.fillMaxWidth().height(1.8.dp).background(IxhInk))
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(7.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = IxhGreen,
-                        trackColor = IxhSurfaceMuted
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = if (totalStudents == 0) "Belum ada anggota" else "Ketuk untuk kelola absensi",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = IxhTextSecondary
-                    )
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                text = "$presentCount / $totalStudents",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (presentCount > 0) IxhGreenBg else IxhSurfaceMuted)
+                                    .border(1.4.dp, IxhInk, RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = attendancePctLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = IxhInk,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            progress = { attendanceProgress },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(9.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .border(1.5.dp, IxhInk, RoundedCornerShape(6.dp)),
+                            color = IxhGreen,
+                            trackColor = IxhSurfaceMuted
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = if (totalStudents == 0) "Belum ada anggota" else "Ketuk untuk kelola absensi →",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = IxhTextSecondary
+                        )
+                    }
                 }
 
                 IxhCard(
                     modifier = Modifier
                         .weight(1f)
                         .testTag("dashboard_cash_summary_card"),
+                    backgroundColor = IxhYellowSoft,
                     hasHardShadow = true,
+                    contentPadding = PaddingValues(0.dp),
                     onClick = {
                         onOpenKasTab(0)
                         onSelectMainTab(MainNavTab.KAS)
                     }
                 ) {
+                    // Bold Charcoal Header Band with Yellow Text
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(IxhInk)
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "SALDO KAS IX-H",
-                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = IxhTextSecondary
+                            color = IxhYellow
                         )
                         IxhDualToneSystemIcon(iconType = IxhSystemIconType.KAS, size = 20.dp)
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = formatRupiah(netCashBalance),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    IxhStatusChip(
-                        text = if (transactions.isEmpty()) "0 Transaksi" else "${transactions.size} Transaksi",
-                        tone = if (transactions.isEmpty()) ChipTone.NEUTRAL else ChipTone.GREEN
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = if (unpaidCount > 0) "$unpaidCount siswa belum lunas" else "Buku kas kelas aktif",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (unpaidCount > 0) IxhAmber else IxhTextSecondary
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = formatRupiah(netCashBalance),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        IxhStatusChip(
+                            text = if (transactions.isEmpty()) "0 Transaksi" else "${transactions.size} Transaksi",
+                            tone = if (transactions.isEmpty()) ChipTone.NEUTRAL else ChipTone.GREEN
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Text(
+                            text = if (unpaidCount > 0) "$unpaidCount siswa belum lunas" else "Buku kas kelas aktif →",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (unpaidCount > 0) IxhAmber else IxhInk
+                        )
+                    }
                 }
             } else {
                 val myPresent = activeUser?.presentDaysCount ?: 0
@@ -372,22 +408,33 @@ fun DashboardScreen(
         // Admin Governance Strip: Backup & Restore + Audit Log + Offline Sync Queue
         if (role == UserRole.ADMIN.name) {
             Spacer(modifier = Modifier.height(10.dp))
+            val govShape = RoundedCornerShape(topStart = 18.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 18.dp)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
+                        .neubrutalShadow(cornerRadius = 16.dp, offsetX = 2.4.dp, offsetY = 3.4.dp)
+                        .clip(govShape)
                         .background(IxhWhite)
-                        .border(1.6.dp, IxhInk, RoundedCornerShape(14.dp))
+                        .border(2.2.dp, IxhInk, govShape)
                         .clickable { onNavigateRoute(AppScreenRoute.BACKUP_RESTORE) }
-                        .padding(horizontal = 10.dp, vertical = 9.dp)
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
                         .testTag("dashboard_backup_restore_button"),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IxhDualToneSystemIcon(iconType = IxhSystemIconType.PENGATURAN, size = 18.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(IxhYellow)
+                            .border(1.6.dp, IxhInk, RoundedCornerShape(9.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        IxhDualToneSystemIcon(iconType = IxhSystemIconType.PENGATURAN, size = 18.dp)
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
@@ -399,6 +446,7 @@ fun DashboardScreen(
                         Text(
                             text = "Cadangkan DB v3",
                             style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
                             color = IxhTextSecondary,
                             fontSize = 9.5.sp
                         )
@@ -408,15 +456,25 @@ fun DashboardScreen(
                 Row(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
+                        .neubrutalShadow(cornerRadius = 16.dp, offsetX = 2.4.dp, offsetY = 3.4.dp)
+                        .clip(govShape)
                         .background(IxhWhite)
-                        .border(1.6.dp, IxhInk, RoundedCornerShape(14.dp))
+                        .border(2.2.dp, IxhInk, govShape)
                         .clickable { onNavigateRoute(AppScreenRoute.ACTIVITY_LOGS) }
-                        .padding(horizontal = 10.dp, vertical = 9.dp)
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
                         .testTag("dashboard_audit_log_button"),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IxhDualToneSystemIcon(iconType = IxhSystemIconType.ADMIN, size = 18.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(IxhYellow)
+                            .border(1.6.dp, IxhInk, RoundedCornerShape(9.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        IxhDualToneSystemIcon(iconType = IxhSystemIconType.ADMIN, size = 18.dp)
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
@@ -428,6 +486,7 @@ fun DashboardScreen(
                         Text(
                             text = "Riwayat Permanen",
                             style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
                             color = IxhTextSecondary,
                             fontSize = 9.5.sp
                         )
@@ -496,22 +555,12 @@ fun DashboardScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         // Tugas Terdekat & Jadwal Hari Ini Preview
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Agenda & Tugas Terdekat", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
-            Text(
-                text = "Semua Tugas",
-                style = MaterialTheme.typography.labelMedium,
-                color = IxhTextSecondary,
-                modifier = Modifier.clickable { onSelectMainTab(MainNavTab.TUGAS) }
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
+        IxhSculptedSectionHeader(
+            title = "Agenda & Tugas Terdekat",
+            actionLabel = "Semua Tugas",
+            onActionClick = { onSelectMainTab(MainNavTab.TUGAS) }
+        )
+        Spacer(modifier = Modifier.height(6.dp))
         if (closestAssignment != null) {
             IxhCard(
                 backgroundColor = IxhYellowLight,
@@ -629,12 +678,10 @@ fun DashboardScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         // Quick Actions Grid (3x2 Role-Specific with Bold Rounded Dual-Tone Icons)
-        Text(
-            text = if (isStudent) "Menu Cepat Siswa" else "Aksi Cepat Kelas IX-H",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold
+        IxhSculptedSectionHeader(
+            title = if (isStudent) "Menu Cepat Siswa" else "Aksi Cepat Kelas IX-H"
         )
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         val tiles = when (role) {
             UserRole.ADMIN.name -> listOf(
@@ -719,17 +766,18 @@ fun DashboardScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(bottom = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 rowItems.forEach { item ->
+                    val podShape = RoundedCornerShape(topStart = 14.dp, topEnd = 8.dp, bottomStart = 8.dp, bottomEnd = 14.dp)
                     IxhCard(
                         modifier = Modifier
                             .weight(1f)
                             .let { if (item.testTag != null) it.testTag(item.testTag) else it },
                         hasHardShadow = true,
                         onClick = item.onClick,
-                        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 4.dp)
+                        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 4.dp)
                     ) {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -737,38 +785,41 @@ fun DashboardScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(IxhYellowLight)
-                                    .border(1.5.dp, IxhInk, RoundedCornerShape(10.dp)),
+                                    .size(40.dp)
+                                    .neubrutalShadow(cornerRadius = 11.dp, offsetX = 1.8.dp, offsetY = 2.4.dp)
+                                    .clip(podShape)
+                                    .background(IxhYellow)
+                                    .border(2.dp, IxhInk, podShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 IxhDualToneSystemIcon(
                                     iconType = item.systemIcon,
-                                    size = 20.dp
+                                    size = 22.dp
                                 )
                             }
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(7.dp))
                             Text(
                                 text = item.label,
                                 style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1
                             )
                             if (item.badgeText.isNotBlank()) {
-                                Spacer(modifier = Modifier.height(3.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(IxhYellow)
-                                        .border(1.dp, IxhInk, RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 6.dp, vertical = 1.dp)
+                                        .background(IxhInk)
+                                        .border(1.2.dp, IxhInk, RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 7.dp, vertical = 1.5.dp)
                                 ) {
                                     Text(
                                         text = item.badgeText,
-                                        fontSize = 8.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = IxhInk
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = IxhYellow
                                     )
                                 }
                             }
@@ -891,35 +942,31 @@ fun AttendanceMainTabScreen(
             onSearchClick = { onNavigateRoute(AppScreenRoute.GLOBAL_SEARCH) }
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "Absensi Kelas IX-H",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = "Matriks kehadiran harian & pemantauan siswa ($recordedTotal/$total tercatat)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = IxhTextSecondary
-                )
+        IxhOrganicModuleBanner(
+            eyebrowTag = "MATRIKS KEHADIRAN HARIAN",
+            title = "Absensi Kelas IX-H",
+            subtitle = "Matriks kehadiran harian & pemantauan siswa ($recordedTotal/$total tercatat)",
+            iconType = IxhSystemIconType.ABSENSI,
+            trailingContent = {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .neubrutalShadow(cornerRadius = 999.dp, offsetX = 1.8.dp, offsetY = 2.4.dp)
+                        .clip(CircleShape)
+                        .background(IxhWhite)
+                        .border(2.2.dp, IxhInk, CircleShape)
+                        .clickable { showInfoSheet = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Outlined.Info,
+                        contentDescription = "Arti Status Kehadiran",
+                        tint = IxhInk,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(IxhWhite)
-                    .border(1.5.dp, IxhInk, CircleShape)
-                    .clickable { showInfoSheet = true },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Outlined.Info, contentDescription = "Arti Status Kehadiran", modifier = Modifier.size(18.dp))
-            }
-        }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -1028,22 +1075,27 @@ fun AttendanceMainTabScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 filterOptions.forEach { (key, label) ->
                     val isSel = selectedStatusFilter == key
+                    val pillShape = RoundedCornerShape(topStart = 16.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(14.dp))
+                            .then(
+                                if (isSel) Modifier.neubrutalShadow(cornerRadius = 14.dp, offsetX = 1.8.dp, offsetY = 2.6.dp)
+                                else Modifier
+                            )
+                            .clip(pillShape)
                             .background(if (isSel) IxhYellow else IxhWhite)
-                            .border(1.5.dp, if (isSel) IxhInk else IxhBorder, RoundedCornerShape(14.dp))
+                            .border(if (isSel) 2.2.dp else 1.8.dp, IxhInk, pillShape)
                             .clickable { selectedStatusFilter = key }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .padding(horizontal = 13.dp, vertical = 7.dp)
                     ) {
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelMedium,
-                            fontWeight = if (isSel) FontWeight.ExtraBold else FontWeight.SemiBold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = IxhInk
                         )
                     }

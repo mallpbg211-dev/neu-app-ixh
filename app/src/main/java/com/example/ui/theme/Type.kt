@@ -23,127 +23,136 @@ val PoppinsFontFamily = FontFamily(
 )
 
 val Typography = Typography(
-    // Display L — ExtraBold | Size: 32sp | Line Height: 40sp
+    // Display L — ExtraBold | Size: 32sp | Line Height: 38sp
     displayLarge = TextStyle(
         fontFamily = PoppinsFontFamily,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = (-0.4).sp,
+        lineHeight = 38.sp,
+        letterSpacing = (-0.6).sp,
         color = IxhCharcoal
     ),
-    // Display M — ExtraBold | Size: 28sp | Line Height: 36sp
+    // Display M — ExtraBold | Size: 28sp | Line Height: 34sp
     displayMedium = TextStyle(
         fontFamily = PoppinsFontFamily,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 28.sp,
-        lineHeight = 36.sp,
-        letterSpacing = (-0.3).sp,
+        lineHeight = 34.sp,
+        letterSpacing = (-0.5).sp,
         color = IxhCharcoal
     ),
-    // Display S (Supporting) — ExtraBold | Size: 26sp | Line Height: 34sp
+    // Display S — ExtraBold | Size: 25sp | Line Height: 32sp
     displaySmall = TextStyle(
         fontFamily = PoppinsFontFamily,
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 26.sp,
-        lineHeight = 34.sp,
+        fontSize = 25.sp,
+        lineHeight = 32.sp,
+        letterSpacing = (-0.4).sp,
         color = IxhCharcoal
     ),
-    // Headline L — Bold | Size: 24sp | Line Height: 32sp
+    // Headline L — ExtraBold | Size: 23sp | Line Height: 30sp
     headlineLarge = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 23.sp,
+        lineHeight = 30.sp,
+        letterSpacing = (-0.4).sp,
+        color = IxhCharcoal
+    ),
+    // Headline M — ExtraBold | Size: 20sp | Line Height: 26sp
+    headlineMedium = TextStyle(
+        fontFamily = PoppinsFontFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+        letterSpacing = (-0.3).sp,
+        color = IxhCharcoal
+    ),
+    // Headline S — ExtraBold | Size: 18sp | Line Height: 24sp
+    headlineSmall = TextStyle(
+        fontFamily = PoppinsFontFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
+        letterSpacing = (-0.25).sp,
+        color = IxhCharcoal
+    ),
+    // Title L — ExtraBold | Size: 18sp | Line Height: 24sp
+    titleLarge = TextStyle(
+        fontFamily = PoppinsFontFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
         letterSpacing = (-0.2).sp,
         color = IxhCharcoal
     ),
-    // Headline M — Bold | Size: 20sp | Line Height: 28sp
-    headlineMedium = TextStyle(
-        fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
-        lineHeight = 28.sp,
-        color = IxhCharcoal
-    ),
-    // Headline S (Supporting) — Bold | Size: 18sp | Line Height: 26sp
-    headlineSmall = TextStyle(
-        fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        lineHeight = 26.sp,
-        color = IxhCharcoal
-    ),
-    // Title L — SemiBold | Size: 18sp | Line Height: 26sp
-    titleLarge = TextStyle(
-        fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 26.sp,
-        color = IxhCharcoal
-    ),
-    // Title M — SemiBold | Size: 16sp | Line Height: 24sp
+    // Title M — Bold | Size: 16sp | Line Height: 22sp
     titleMedium = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
+        lineHeight = 22.sp,
+        letterSpacing = (-0.15).sp,
         color = IxhCharcoal
     ),
-    // Title S (Supporting) — SemiBold | Size: 14sp | Line Height: 20sp
+    // Title S — Bold | Size: 14sp | Line Height: 20sp
     titleSmall = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
         lineHeight = 20.sp,
+        letterSpacing = (-0.1).sp,
         color = IxhCharcoal
     ),
-    // Body L — Medium | Size: 14sp | Line Height: 22sp
+    // Body L — SemiBold | Size: 14sp | Line Height: 21sp
     bodyLarge = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
-        lineHeight = 22.sp,
+        lineHeight = 21.sp,
         color = IxhCharcoal
     ),
-    // Body M — Regular | Size: 13sp | Line Height: 20sp
+    // Body M — Medium | Size: 13sp | Line Height: 19sp
     bodyMedium = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Medium,
         fontSize = 13.sp,
-        lineHeight = 20.sp,
+        lineHeight = 19.sp,
         color = IxhCharcoal
     ),
-    // Body S — Regular | Size: 12sp | Line Height: 18sp
+    // Body S — Medium | Size: 12sp | Line Height: 17sp
     bodySmall = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
-        lineHeight = 18.sp,
+        lineHeight = 17.sp,
         color = IxhTextSecondary
     ),
-    // Label — SemiBold | Size: 12sp | Line Height: 18sp
+    // Label L — ExtraBold | Size: 12sp | Line Height: 17sp
     labelLarge = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 12.sp,
-        lineHeight = 18.sp,
+        lineHeight = 17.sp,
+        letterSpacing = 0.1.sp,
         color = IxhCharcoal
     ),
-    // Label M — SemiBold | Size: 11sp | Line Height: 16sp
+    // Label M — Bold | Size: 11sp | Line Height: 15sp
     labelMedium = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 11.sp,
-        lineHeight = 16.sp,
+        lineHeight = 15.sp,
+        letterSpacing = 0.1.sp,
         color = IxhCharcoal
     ),
-    // Label S — SemiBold | Size: 10sp | Line Height: 14sp
+    // Label S — Bold | Size: 10sp | Line Height: 14sp
     labelSmall = TextStyle(
         fontFamily = PoppinsFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 10.sp,
         lineHeight = 14.sp,
+        letterSpacing = 0.15.sp,
         color = IxhTextSecondary
     )
 )

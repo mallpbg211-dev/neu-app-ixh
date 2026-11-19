@@ -131,24 +131,24 @@ fun Modifier.ixhTactileShadow(
     this.drawBehind {
         val rPx = cornerRadius.toPx()
         val dy = level.offsetDp.toPx()
+        val dx = (dy * 0.52f).coerceAtLeast(1.6.dp.toPx())
         if (softShadow || level == IxhElevationLevel.HIGH) {
-            // Soft layered ambient shadow without expensive GPU blur
             drawRoundRect(
-                color = shadowColor.copy(alpha = 0.10f),
-                topLeft = Offset(0f, dy * 1.15f),
+                color = shadowColor.copy(alpha = 0.22f),
+                topLeft = Offset(dx * 0.85f, dy * 1.15f),
                 size = Size(size.width, size.height),
                 cornerRadius = CornerRadius(rPx, rPx)
             )
             drawRoundRect(
-                color = shadowColor.copy(alpha = 0.18f),
-                topLeft = Offset(0f, dy * 0.65f),
+                color = IxhCharcoal,
+                topLeft = Offset(dx * 0.55f, dy * 0.72f),
                 size = Size(size.width, size.height),
                 cornerRadius = CornerRadius(rPx, rPx)
             )
         } else {
             drawRoundRect(
                 color = shadowColor,
-                topLeft = Offset(0f, dy),
+                topLeft = Offset(dx, dy),
                 size = Size(size.width, size.height),
                 cornerRadius = CornerRadius(rPx, rPx)
             )
@@ -206,14 +206,14 @@ fun Modifier.ixhBrandGradientBackground(
         radius = w * (if (isHeroCard) 0.55f else 0.65f)
     )
 
-    // 3. Organic Yellow Wave (Top-Left) merging smoothly with gradient brush
+    // 3. Bold Organic Yellow Wave (Top-Left) with crisp Charcoal contour accent
     val topWavePath = Path().apply {
         moveTo(0f, 0f)
-        lineTo(w * (if (isHeroCard) 0.46f else 0.40f), 0f)
+        lineTo(w * (if (isHeroCard) 0.56f else 0.52f), 0f)
         cubicTo(
-            w * 0.34f, h * (if (isHeroCard) 0.24f else 0.055f),
-            w * 0.14f, h * (if (isHeroCard) 0.32f else 0.075f),
-            0f, h * (if (isHeroCard) 0.52f else 0.125f)
+            w * 0.42f, h * (if (isHeroCard) 0.28f else 0.08f),
+            w * 0.18f, h * (if (isHeroCard) 0.36f else 0.11f),
+            0f, h * (if (isHeroCard) 0.58f else 0.16f)
         )
         close()
     }
@@ -221,22 +221,35 @@ fun Modifier.ixhBrandGradientBackground(
         path = topWavePath,
         brush = Brush.linearGradient(
             colors = listOf(
-                IxhPrimaryYellow.copy(alpha = if (isHeroCard) 0.52f else 0.62f),
-                IxhSecondaryYellow.copy(alpha = if (isHeroCard) 0.28f else 0.34f),
-                IxhLightYellow.copy(alpha = 0.08f)
+                IxhPrimaryYellow.copy(alpha = if (isHeroCard) 0.72f else 0.78f),
+                IxhSecondaryYellow.copy(alpha = if (isHeroCard) 0.44f else 0.48f),
+                IxhLightYellow.copy(alpha = 0.14f)
             ),
             start = Offset(0f, 0f),
-            end = Offset(w * 0.42f, h * (if (isHeroCard) 0.50f else 0.12f))
+            end = Offset(w * 0.48f, h * (if (isHeroCard) 0.54f else 0.15f))
         )
     )
-
-    // 4. Secondary Organic Yellow Wave (Bottom-Left) for full-page or hero cohesion
-    val bottomWavePath = Path().apply {
-        moveTo(0f, h * (if (isHeroCard) 0.72f else 0.88f))
+    val topWaveEdge = Path().apply {
+        moveTo(w * (if (isHeroCard) 0.56f else 0.52f), 0f)
         cubicTo(
-            w * 0.16f, h * (if (isHeroCard) 0.80f else 0.91f),
-            w * 0.28f, h * (if (isHeroCard) 0.92f else 0.96f),
-            w * (if (isHeroCard) 0.42f else 0.48f), h
+            w * 0.42f, h * (if (isHeroCard) 0.28f else 0.08f),
+            w * 0.18f, h * (if (isHeroCard) 0.36f else 0.11f),
+            0f, h * (if (isHeroCard) 0.58f else 0.16f)
+        )
+    }
+    drawPath(
+        path = topWaveEdge,
+        color = IxhCharcoal.copy(alpha = if (isHeroCard) 0.18f else 0.14f),
+        style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
+    )
+
+    // 4. Secondary Organic Yellow Wave (Bottom-Right & Bottom-Left) for dynamic diagonal flow
+    val bottomWavePath = Path().apply {
+        moveTo(0f, h * (if (isHeroCard) 0.70f else 0.86f))
+        cubicTo(
+            w * 0.22f, h * (if (isHeroCard) 0.78f else 0.90f),
+            w * 0.36f, h * (if (isHeroCard) 0.92f else 0.96f),
+            w * (if (isHeroCard) 0.52f else 0.58f), h
         )
         lineTo(0f, h)
         close()
@@ -245,12 +258,12 @@ fun Modifier.ixhBrandGradientBackground(
         path = bottomWavePath,
         brush = Brush.linearGradient(
             colors = listOf(
-                IxhPrimaryYellow.copy(alpha = if (isHeroCard) 0.34f else 0.46f),
-                IxhSecondaryYellow.copy(alpha = 0.18f),
+                IxhPrimaryYellow.copy(alpha = if (isHeroCard) 0.48f else 0.58f),
+                IxhSecondaryYellow.copy(alpha = 0.25f),
                 Color.Transparent
             ),
             start = Offset(0f, h),
-            end = Offset(w * 0.44f, h * (if (isHeroCard) 0.72f else 0.88f))
+            end = Offset(w * 0.50f, h * (if (isHeroCard) 0.70f else 0.86f))
         )
     )
 
@@ -1140,8 +1153,8 @@ fun IxhDualToneSystemIcon(
     Canvas(modifier = modifier.size(size)) {
         val w = this.size.width
         val h = this.size.height
-        val s = (size.value / 34f).coerceIn(0.58f, 1.25f)
-        val strokePx = (2.55f * s).dp.toPx().coerceAtLeast(1.65.dp.toPx())
+        val s = (size.value / 34f).coerceIn(0.62f, 1.30f)
+        val strokePx = (2.95f * s).dp.toPx().coerceAtLeast(1.95.dp.toPx())
         val boldStroke = Stroke(
             width = strokePx,
             cap = StrokeCap.Round,

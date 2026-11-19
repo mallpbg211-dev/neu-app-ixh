@@ -65,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -330,16 +331,21 @@ fun FirstRunAdminSetupScreen(
                     .widthIn(max = 460.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
-                val cardShape = RoundedCornerShape(tokens.radius.extraLarge)
+                val cardShape = RoundedCornerShape(
+                    topStart = 30.dp,
+                    topEnd = 18.dp,
+                    bottomStart = 18.dp,
+                    bottomEnd = 32.dp
+                )
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 120.dp)
                         .ixhTactileShadow(
-                            level = IxhElevationLevel.MEDIUM,
-                            cornerRadius = tokens.radius.extraLarge,
-                            shadowColor = IxhCharcoal.copy(alpha = 0.22f)
+                            level = IxhElevationLevel.HIGH,
+                            cornerRadius = 26.dp,
+                            shadowColor = IxhCharcoal.copy(alpha = 0.88f)
                         )
                         .clip(cardShape)
                         .background(
@@ -348,7 +354,26 @@ fun FirstRunAdminSetupScreen(
                             ),
                             cardShape
                         )
-                        .border(tokens.border.thick, IxhCharcoal, cardShape)
+                        .drawBehind {
+                            val w = size.width
+                            val h = size.height
+                            val topWave = Path().apply {
+                                moveTo(0f, 0f)
+                                lineTo(w, 0f)
+                                lineTo(w, h * 0.14f)
+                                cubicTo(w * 0.72f, h * 0.08f, w * 0.32f, h * 0.18f, 0f, h * 0.11f)
+                                close()
+                            }
+                            drawPath(topWave, color = IxhYellowSoft.copy(alpha = 0.65f))
+                            val bottomWave = Path().apply {
+                                moveTo(w * 0.52f, h)
+                                cubicTo(w * 0.66f, h * 0.90f, w * 0.85f, h * 0.88f, w, h * 0.82f)
+                                lineTo(w, h)
+                                close()
+                            }
+                            drawPath(bottomWave, color = IxhPrimaryYellow.copy(alpha = 0.35f))
+                        }
+                        .border(2.6.dp, IxhCharcoal, cardShape)
                         .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 22.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -362,17 +387,28 @@ fun FirstRunAdminSetupScreen(
                     Text(
                         text = "Buat Admin Pertama",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontSize = 21.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = IxhCharcoal,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(132.dp)
+                            .height(6.dp)
+                            .clip(CircleShape)
+                            .background(IxhPrimaryYellow)
+                            .border(1.5.dp, IxhCharcoal, CircleShape)
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
                         text = "Belum ada akun di sistem IX-H HUB 1.0.\nBuat akun Admin utama untuk memulai manajemen kelas.",
                         style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = IxhTextSecondary,
                         textAlign = TextAlign.Center,
                         lineHeight = 18.sp
@@ -1095,8 +1131,12 @@ private fun LoginMainFormCard(
     onSubmitLogin: () -> Unit,
     onForgotPassword: () -> Unit
 ) {
-    val tokens = LocalIxhDesign.current
-    val cardShape = RoundedCornerShape(tokens.radius.extraLarge)
+    val cardShape = RoundedCornerShape(
+        topStart = 30.dp,
+        topEnd = 18.dp,
+        bottomStart = 18.dp,
+        bottomEnd = 32.dp
+    )
 
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -1107,9 +1147,9 @@ private fun LoginMainFormCard(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
                 .ixhTactileShadow(
-                    level = IxhElevationLevel.MEDIUM,
-                    cornerRadius = tokens.radius.extraLarge,
-                    shadowColor = IxhCharcoal.copy(alpha = 0.22f)
+                    level = IxhElevationLevel.HIGH,
+                    cornerRadius = 26.dp,
+                    shadowColor = IxhCharcoal.copy(alpha = 0.88f)
                 )
                 .clip(cardShape)
                 .background(
@@ -1121,7 +1161,26 @@ private fun LoginMainFormCard(
                     ),
                     cardShape
                 )
-                .border(tokens.border.thick, IxhCharcoal, cardShape)
+                .drawBehind {
+                    val w = size.width
+                    val h = size.height
+                    val topWave = Path().apply {
+                        moveTo(0f, 0f)
+                        lineTo(w, 0f)
+                        lineTo(w, h * 0.16f)
+                        cubicTo(w * 0.70f, h * 0.09f, w * 0.30f, h * 0.20f, 0f, h * 0.12f)
+                        close()
+                    }
+                    drawPath(topWave, color = IxhYellowSoft.copy(alpha = 0.70f))
+                    val bottomWave = Path().apply {
+                        moveTo(w * 0.50f, h)
+                        cubicTo(w * 0.65f, h * 0.88f, w * 0.84f, h * 0.86f, w, h * 0.78f)
+                        lineTo(w, h)
+                        close()
+                    }
+                    drawPath(bottomWave, color = IxhPrimaryYellow.copy(alpha = 0.38f))
+                }
+                .border(2.6.dp, IxhCharcoal, cardShape)
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
@@ -1133,33 +1192,26 @@ private fun LoginMainFormCard(
             Text(
                 text = "Selamat Datang!",
                 style = MaterialTheme.typography.headlineMedium,
-                fontSize = 22.sp,
+                fontSize = 23.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = IxhCharcoal,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Box(
                 modifier = Modifier
                     .width(156.dp)
-                    .height(4.dp)
+                    .height(6.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                IxhPrimaryYellow.copy(alpha = 0.45f),
-                                IxhPrimaryYellow,
-                                IxhPrimaryYellow.copy(alpha = 0.45f)
-                            )
-                        )
-                    )
+                    .background(IxhPrimaryYellow)
+                    .border(1.5.dp, IxhCharcoal, CircleShape)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Masuk untuk melanjutkan\naktivitas kelas IX-H.",
                 style = MaterialTheme.typography.bodyMedium,
                 fontSize = 13.5.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 color = IxhCharcoal,
                 textAlign = TextAlign.Center,
                 lineHeight = 19.sp

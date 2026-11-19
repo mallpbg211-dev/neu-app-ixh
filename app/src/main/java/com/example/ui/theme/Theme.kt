@@ -64,30 +64,30 @@ data class IxhRadiusTokens(
  */
 @Immutable
 data class IxhBorderTokens(
-    val thin: Dp = 1.dp,
-    val regular: Dp = 1.5.dp,
-    val thick: Dp = 2.dp,
+    val thin: Dp = 1.5.dp,
+    val regular: Dp = 2.dp,
+    val thick: Dp = 2.6.dp,
     val primaryOutline: Color = IxhCharcoal,
-    val mutedOutline: Color = IxhMutedBorder
+    val mutedOutline: Color = IxhCharcoal
 )
 
 /**
  * Elevation / Tactile Shadow System (Master Prompt V2 §3.5 & referensi_desain_system.png)
- * - Low: 2 dp
- * - Medium: 4 dp
+ * - Low: 2.5 dp
+ * - Medium: 4.5 dp
  * - High: 8 dp
  */
 enum class IxhElevationLevel(val offsetDp: Dp, val label: String) {
     NONE(0.dp, "None (0 dp)"),
-    LOW(2.dp, "Low (2 dp)"),
-    MEDIUM(4.dp, "Medium (4 dp)"),
+    LOW(2.5.dp, "Low (2.5 dp)"),
+    MEDIUM(4.5.dp, "Medium (4.5 dp)"),
     HIGH(8.dp, "High (8 dp)")
 }
 
 @Immutable
 data class IxhElevationTokens(
-    val low: Dp = 2.dp,
-    val medium: Dp = 4.dp,
+    val low: Dp = 2.5.dp,
+    val medium: Dp = 4.5.dp,
     val high: Dp = 8.dp
 )
 
@@ -101,12 +101,12 @@ data class IxhDesignTokens(
     val border: IxhBorderTokens = IxhBorderTokens(),
     val elevation: IxhElevationTokens = IxhElevationTokens(),
     // Token spesifik komponen & kompatibilitas mundur
-    val cardCornerRadius: Dp = 16.dp,
+    val cardCornerRadius: Dp = 18.dp,
     val buttonCornerRadius: Dp = 999.dp,
     val inputCornerRadius: Dp = 999.dp,
-    val primaryStrokeWidth: Dp = 2.dp,
-    val secondaryStrokeWidth: Dp = 1.5.dp,
-    val shadowOffsetY: Dp = 3.dp
+    val primaryStrokeWidth: Dp = 2.4.dp,
+    val secondaryStrokeWidth: Dp = 2.dp,
+    val shadowOffsetY: Dp = 4.dp
 )
 
 val LocalIxhDesign = staticCompositionLocalOf { IxhDesignTokens() }

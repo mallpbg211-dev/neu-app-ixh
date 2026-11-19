@@ -74,13 +74,17 @@ import com.example.ui.components.IxhBlobMascot
 import com.example.ui.components.IxhCard
 import com.example.ui.components.IxhCircleIcon
 import com.example.ui.components.IxhEmptyStateCard
+import com.example.ui.components.IxhOrganicModuleBanner
 import com.example.ui.components.IxhPrimaryButton
+import com.example.ui.components.IxhSculptedSectionHeader
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhSegmentedTabs
 import com.example.ui.components.IxhStatusChip
 import com.example.ui.components.IxhSubScreenTopBar
+import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.IxhTopBrandHeader
 import com.example.ui.components.IxhWaBubblePreview
+import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhAmber
 import com.example.ui.theme.IxhAmberBg
 import com.example.ui.theme.IxhBlue
@@ -152,18 +156,12 @@ fun CashMainTabScreen(
                 onRoleBadgeClick = onOpenRoleSwitcher
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Kas Kelas IX-H",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = IxhInk
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            IxhOrganicModuleBanner(
+                eyebrowTag = "BUKU BESAR & TAGIHAN",
+                title = "Kas Kelas IX-H",
+                subtitle = "Buku kas transparan & rekap iuran siswa tercatat otomatis",
+                iconType = IxhSystemIconType.KAS,
+                trailingContent = {
                     IxhStatusChip(
                         text = if (isSiswa) "Tagihan Saya" else "Riwayat & Ekspor",
                         tone = ChipTone.OUTLINE_YELLOW,
@@ -176,7 +174,7 @@ fun CashMainTabScreen(
                         }
                     )
                 }
-            }
+            )
 
             IxhSegmentedTabs(
                 tabs = listOf("Transaksi", "Tagihan"),
@@ -186,83 +184,124 @@ fun CashMainTabScreen(
             )
 
             if (selectedTabIndex == 0) {
+                // Sculpted Vault / Banknote Ledger Card
                 IxhCard(
                     backgroundColor = IxhYellow,
                     hasHardShadow = true,
-                    contentPadding = PaddingValues(14.dp)
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text(
-                        text = "SALDO KAS TERKONFIRMASI",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = IxhInk
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = formatIdr(netBalance),
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
-                    )
-                    Text(
-                        text = "Dihitung langsung dari transaksi masuk & keluar tercatat",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = IxhInk.copy(alpha = 0.8f)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    // Bold Charcoal Vault Header Bar
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(IxhInk)
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
+                        Text(
+                            text = "SALDO KAS TERKONFIRMASI",
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhYellow,
+                            letterSpacing = 0.5.sp
+                        )
+                        Box(
                             modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(IxhWhite)
-                                .border(1.5.dp, IxhInk, RoundedCornerShape(10.dp))
-                                .padding(8.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(IxhYellow)
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = "Total Pemasukan",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = IxhTextSecondary
-                            )
-                            Text(
-                                text = formatIdr(totalIncome),
-                                style = MaterialTheme.typography.titleMedium,
+                                text = "AUDIT AKTIF",
+                                fontSize = 8.5.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = IxhGreen
-                            )
-                            Text(
-                                text = "$incomeCount transaksi masuk",
-                                fontSize = 9.5.sp,
-                                color = IxhTextSecondary
+                                color = IxhInk
                             )
                         }
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(IxhWhite)
-                                .border(1.5.dp, IxhInk, RoundedCornerShape(10.dp))
-                                .padding(8.dp)
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp)
+                    ) {
+                        Text(
+                            text = formatIdr(netBalance),
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhInk
+                        )
+                        Text(
+                            text = "Dihitung langsung dari transaksi masuk & keluar tercatat",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = IxhInk
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        val podShape = RoundedCornerShape(topStart = 16.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(
-                                text = "Total Pengeluaran",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = IxhTextSecondary
-                            )
-                            Text(
-                                text = formatIdr(totalExpense),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = IxhRed
-                            )
-                            Text(
-                                text = "$expenseCount transaksi keluar",
-                                fontSize = 9.5.sp,
-                                color = IxhTextSecondary
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .neubrutalShadow(cornerRadius = 14.dp, offsetX = 2.dp, offsetY = 2.8.dp)
+                                    .clip(podShape)
+                                    .background(IxhWhite)
+                                    .border(2.2.dp, IxhInk, podShape)
+                                    .padding(10.dp)
+                            ) {
+                                Text(
+                                    text = "Total Pemasukan",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = IxhInk
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = formatIdr(totalIncome),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = IxhGreenText
+                                )
+                                Text(
+                                    text = "$incomeCount transaksi masuk",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = IxhTextSecondary
+                                )
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .neubrutalShadow(cornerRadius = 14.dp, offsetX = 2.dp, offsetY = 2.8.dp)
+                                    .clip(podShape)
+                                    .background(IxhWhite)
+                                    .border(2.2.dp, IxhInk, podShape)
+                                    .padding(10.dp)
+                            ) {
+                                Text(
+                                    text = "Total Pengeluaran",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = IxhInk
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = formatIdr(totalExpense),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = IxhRed
+                                )
+                                Text(
+                                    text = "$expenseCount transaksi keluar",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = IxhTextSecondary
+                                )
+                            }
                         }
                     }
                 }
@@ -270,6 +309,8 @@ fun CashMainTabScreen(
                 // Active Bill quick summary card
                 IxhCard(
                     backgroundColor = IxhWhite,
+                    leftStripeColor = IxhYellow,
+                    hasHardShadow = true,
                     onClick = { onSelectTabIndex(1) }
                 ) {
                     Row(
@@ -281,45 +322,37 @@ fun CashMainTabScreen(
                             Text(
                                 text = "Tagihan Aktif • Kas Minggu ke-1 Nov",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 color = IxhInk
                             )
                             Text(
                                 text = "$paidCount/$totalStudents lunas • $unpaidCount belum • $arrearsCount tunggakan",
                                 style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
                                 color = IxhTextSecondary
                             )
                         }
-                        Text(
-                            text = "Kelola →",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = IxhInk
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(IxhInk)
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                        ) {
+                            Text(
+                                text = "Kelola →",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhYellow
+                            )
+                        }
                     }
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Transaksi Terbaru",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = IxhInk
-                    )
-                    Text(
-                        text = "Semua →",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = IxhTextSecondary,
-                        modifier = Modifier.clickable {
-                            onNavigate(AppScreenRoute.CASH_HISTORY_EXPORT)
-                        }
-                    )
-                }
+                IxhSculptedSectionHeader(
+                    title = "Transaksi Terbaru",
+                    actionLabel = "Semua",
+                    onActionClick = { onNavigate(AppScreenRoute.CASH_HISTORY_EXPORT) }
+                )
 
                 if (transactions.isEmpty()) {
                     IxhEmptyStateCard(
@@ -545,14 +578,16 @@ fun CashMainTabScreen(
 
         // FAB + Catat Transaksi / Buat Tagihan for Admin/Pengurus
         if (!isSiswa) {
+            val fabShape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp, bottom = 18.dp)
-                    .size(52.dp)
-                    .clip(CircleShape)
+                    .size(54.dp)
+                    .neubrutalShadow(cornerRadius = 16.dp, offsetX = 2.8.dp, offsetY = 4.dp)
+                    .clip(fabShape)
                     .background(IxhYellow)
-                    .border(2.dp, IxhInk, CircleShape)
+                    .border(2.5.dp, IxhInk, fabShape)
                     .clickable {
                         if (selectedTabIndex == 0) {
                             onNavigate(AppScreenRoute.CASH_ADD_TRANSACTION)
@@ -567,7 +602,7 @@ fun CashMainTabScreen(
                     imageVector = Icons.Outlined.Add,
                     contentDescription = "Tambah Transaksi atau Tagihan",
                     tint = IxhInk,
-                    modifier = Modifier.size(26.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }

@@ -61,12 +61,15 @@ import com.example.ui.components.IxhCard
 import com.example.ui.components.IxhCircleIcon
 import com.example.ui.components.IxhEmptyStateCard
 import com.example.ui.components.IxhNeubrutalToggle
+import com.example.ui.components.IxhOrganicModuleBanner
 import com.example.ui.components.IxhPrimaryButton
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhSegmentedTabs
 import com.example.ui.components.IxhStatusChip
 import com.example.ui.components.IxhSubScreenTopBar
+import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.IxhTopBrandHeader
+import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhAmber
 import com.example.ui.theme.IxhAmberBg
 import com.example.ui.theme.IxhBlue
@@ -129,39 +132,31 @@ fun ScheduleMainTabScreen(
             onSearchClick = { onNavigate(AppScreenRoute.GLOBAL_SEARCH) }
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "Jadwal Pelajaran",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = IxhInk
-                )
-                Text(
-                    text = "Hari $selectedDayFullName • ${daySchedules.count { !it.isBreak }} Mata Pelajaran",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = IxhTextSecondary
-                )
+        IxhOrganicModuleBanner(
+            eyebrowTag = "KRONOLOGI KELAS IX-H",
+            title = "Jadwal Pelajaran",
+            subtitle = "Hari $selectedDayFullName • ${daySchedules.count { !it.isBreak }} Mata Pelajaran",
+            iconType = IxhSystemIconType.JADWAL,
+            trailingContent = {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    IxhStatusChip(
+                        text = "Kalender",
+                        tone = ChipTone.OUTLINE_YELLOW,
+                        modifier = Modifier.clickable {
+                            onNavigate(AppScreenRoute.ACADEMIC_CALENDAR)
+                        }
+                    )
+                    IxhStatusChip(
+                        text = if (showOfflinePreview) "Online" else "Offline UI",
+                        tone = ChipTone.NEUTRAL,
+                        modifier = Modifier.clickable { showOfflinePreview = !showOfflinePreview }
+                    )
+                }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                IxhStatusChip(
-                    text = "Kalender",
-                    tone = ChipTone.OUTLINE_YELLOW,
-                    modifier = Modifier.clickable {
-                        onNavigate(AppScreenRoute.ACADEMIC_CALENDAR)
-                    }
-                )
-                IxhStatusChip(
-                    text = if (showOfflinePreview) "Online" else "Offline UI",
-                    tone = ChipTone.NEUTRAL,
-                    modifier = Modifier.clickable { showOfflinePreview = !showOfflinePreview }
-                )
-            }
-        }
+        )
 
         if (showOfflinePreview) {
             IxhAlertBanner(
@@ -172,7 +167,7 @@ fun ScheduleMainTabScreen(
             )
         }
 
-        // 6-Day Selector Pill Bar (Senin - Sabtu) with active lesson badge count
+        // 6-Day Selector Pill Bar (Senin - Sabtu) with active lesson badge count & sculpted shape
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -180,34 +175,51 @@ fun ScheduleMainTabScreen(
             days.forEach { (code, _) ->
                 val isSelected = code == selectedDayCode
                 val lessonCountForDay = schedules.count { it.dayCode == code && !it.isBreak }
+                val dayShape = RoundedCornerShape(topStart = 16.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
+                        .then(
+                            if (isSelected) Modifier.neubrutalShadow(cornerRadius = 14.dp, offsetX = 2.dp, offsetY = 3.dp)
+                            else Modifier
+                        )
+                        .clip(dayShape)
                         .background(if (isSelected) IxhYellow else IxhWhite)
                         .border(
-                            width = if (isSelected) 2.dp else 1.5.dp,
-                            color = if (isSelected) IxhInk else IxhBorder,
-                            shape = RoundedCornerShape(14.dp)
+                            width = if (isSelected) 2.3.dp else 1.8.dp,
+                            color = IxhInk,
+                            shape = dayShape
                         )
                         .clickable { onSelectDay(code) }
-                        .padding(vertical = 8.dp)
                         .testTag("schedule_day_$code"),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = code,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "$lessonCountForDay mapel",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isSelected) IxhInk else IxhTextSecondary
-                    )
+                    if (isSelected) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .background(IxhInk)
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.padding(vertical = 7.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = code,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhInk
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "$lessonCountForDay mapel",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (isSelected) IxhInk else IxhTextSecondary
+                        )
+                    }
                 }
             }
         }
@@ -281,27 +293,36 @@ fun ScheduleMainTabScreen(
                         // Left Time & Rail Column
                         Column(
                             modifier = Modifier
-                                .width(64.dp)
+                                .width(66.dp)
                                 .fillMaxHeight()
                                 .padding(top = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
-                                text = item.startTime,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = IxhInk
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isOngoing) IxhInk else IxhYellowLight)
+                                    .border(1.8.dp, IxhInk, RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = item.startTime,
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (isOngoing) IxhYellow else IxhInk
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = item.endTime,
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.Bold,
                                 color = IxhTextSecondary
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Box(
                                 modifier = Modifier
-                                    .size(12.dp)
+                                    .size(14.dp)
                                     .clip(CircleShape)
                                     .background(
                                         when {
@@ -310,14 +331,14 @@ fun ScheduleMainTabScreen(
                                             else -> IxhBlue
                                         }
                                     )
-                                    .border(2.dp, IxhInk, CircleShape)
+                                    .border(2.2.dp, IxhInk, CircleShape)
                             )
                             if (idx < daySchedules.lastIndex) {
                                 Box(
                                     modifier = Modifier
-                                        .width(2.dp)
+                                        .width(2.5.dp)
                                         .weight(1f)
-                                        .background(IxhInk.copy(alpha = 0.25f))
+                                        .background(IxhInk)
                                 )
                             }
                         }
@@ -902,49 +923,39 @@ fun TasksMainTabScreen(
                 onSearchClick = { onNavigate(AppScreenRoute.GLOBAL_SEARCH) }
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Tugas Kelas IX-H",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
-                    )
-                    Text(
-                        text = "Progres penyelesaian $progressPct% • $urgentTasks mendesak",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = IxhTextSecondary
-                    )
+            IxhOrganicModuleBanner(
+                eyebrowTag = "PAPAN PRIORITAS TUGAS",
+                title = "Tugas Kelas IX-H",
+                subtitle = "Progres penyelesaian $progressPct% • $urgentTasks mendesak",
+                iconType = IxhSystemIconType.TUGAS,
+                trailingContent = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .neubrutalShadow(cornerRadius = 12.dp, offsetX = 1.6.dp, offsetY = 2.2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(IxhWhite)
+                            .border(2.dp, IxhInk, RoundedCornerShape(12.dp))
+                            .clickable { showColorInfoSheet = true }
+                            .padding(horizontal = 9.dp, vertical = 6.dp)
+                            .testTag("task_color_info_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "Arti Warna Tugas",
+                            tint = IxhInk,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Arti Warna",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhInk
+                        )
+                    }
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(IxhWhite)
-                        .border(1.5.dp, IxhInk, RoundedCornerShape(14.dp))
-                        .clickable { showColorInfoSheet = true }
-                        .padding(horizontal = 8.dp, vertical = 5.dp)
-                        .testTag("task_color_info_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = "Arti Warna Tugas",
-                        tint = IxhInk,
-                        modifier = Modifier.size(15.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Arti Warna",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = IxhInk
-                    )
-                }
-            }
+            )
 
             // Summary KPI Row + Completion Bar
             IxhCard(
@@ -964,16 +975,16 @@ fun TasksMainTabScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(10.dp)
+                        .height(11.dp)
                         .clip(RoundedCornerShape(999.dp))
                         .background(IxhSurfaceMuted)
-                        .border(1.dp, IxhInk, RoundedCornerShape(999.dp))
+                        .border(1.8.dp, IxhInk, RoundedCornerShape(999.dp))
                 ) {
                     if (completedTasks > 0 && totalTasks > 0) {
                         Box(
                             modifier = Modifier
                                 .weight(completedTasks.toFloat())
-                                .height(10.dp)
+                                .height(11.dp)
                                 .background(IxhGreen)
                         )
                     }
@@ -981,7 +992,7 @@ fun TasksMainTabScreen(
                         Box(
                             modifier = Modifier
                                 .weight(upcomingTasks.toFloat())
-                                .height(10.dp)
+                                .height(11.dp)
                                 .background(IxhYellow)
                         )
                     }
@@ -1071,14 +1082,16 @@ fun TasksMainTabScreen(
         }
 
         if (!isSiswa) {
+            val fabShape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp, bottom = 18.dp)
-                    .size(52.dp)
-                    .clip(CircleShape)
+                    .size(54.dp)
+                    .neubrutalShadow(cornerRadius = 16.dp, offsetX = 2.8.dp, offsetY = 4.dp)
+                    .clip(fabShape)
                     .background(IxhYellow)
-                    .border(2.dp, IxhInk, CircleShape)
+                    .border(2.5.dp, IxhInk, fabShape)
                     .clickable { onNavigate(AppScreenRoute.ASSIGNMENT_FORM) }
                     .testTag("tasks_fab_add"),
                 contentAlignment = Alignment.Center
@@ -1087,7 +1100,7 @@ fun TasksMainTabScreen(
                     imageVector = Icons.Outlined.Add,
                     contentDescription = "Tambah Tugas",
                     tint = IxhInk,
-                    modifier = Modifier.size(26.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
@@ -1124,11 +1137,13 @@ fun TasksMainTabScreen(
 
 @Composable
 private fun TaskKpiMiniCard(label: String, value: String, bg: Color, modifier: Modifier = Modifier) {
+    val kpiShape = RoundedCornerShape(topStart = 15.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 15.dp)
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .neubrutalShadow(cornerRadius = 13.dp, offsetX = 1.8.dp, offsetY = 2.4.dp)
+            .clip(kpiShape)
             .background(bg)
-            .border(1.5.dp, IxhInk, RoundedCornerShape(12.dp))
+            .border(2.dp, IxhInk, kpiShape)
             .padding(vertical = 8.dp, horizontal = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -1141,7 +1156,8 @@ private fun TaskKpiMiniCard(label: String, value: String, bg: Color, modifier: M
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
+            fontWeight = FontWeight.Bold,
+            color = IxhInk
         )
     }
 }

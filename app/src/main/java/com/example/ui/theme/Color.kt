@@ -24,21 +24,21 @@ val IxhError = Color(0xFFE34B4B)            // Error (#E34B4B)
 val IxhInfo = Color(0xFF4A91D9)             // Information (#4A91D9)
 
 // Documented Supporting Semantic Surface/Text Tokens
-// Digunakan khusus untuk latar lembut pada Chip/Badge, Banner State & Feedback, serta teks sekunder
-val IxhTextSecondary = Color(0xFF5C564B)    // Teks sekunder kontras WCAG AA di atas Cream/White
-val IxhShadowSubtle = Color(0xFFD8CEB4)     // Bayangan lembut untuk kartu non-primer
+// Digunakan khusus untuk latar lembut pada Chip/Badge, Banner State & Feedback, serta teks sekunder kontras tinggi
+val IxhTextSecondary = Color(0xFF3A362E)    // Teks sekunder kontras tinggi & tegas di atas Cream/White
+val IxhShadowSubtle = Color(0xFF1C1B1F)     // Bayangan taktil tegas berbasis Charcoal
 
-val IxhSuccessBg = Color(0xFFDDF5E8)        // Latar chip/banner Success (Aktif / Berhasil)
-val IxhSuccessText = Color(0xFF1E7045)      // Teks kontras tinggi pada chip Success
+val IxhSuccessBg = Color(0xFFD6F5E5)        // Latar chip/banner Success (Aktif / Berhasil)
+val IxhSuccessText = Color(0xFF125933)      // Teks kontras tinggi pada chip Success
 
-val IxhWarningBg = Color(0xFFFFF0C7)        // Latar chip/banner Warning (Perhatian)
-val IxhWarningText = Color(0xFF8C5800)      // Teks kontras tinggi pada chip Warning
+val IxhWarningBg = Color(0xFFFFECB3)        // Latar chip/banner Warning (Perhatian)
+val IxhWarningText = Color(0xFF6E4200)      // Teks kontras tinggi pada chip Warning
 
-val IxhErrorBg = Color(0xFFFDE2E4)          // Latar chip/banner Error ("1 hari lagi" / Gagal)
-val IxhErrorText = Color(0xFFB82832)        // Teks kontras tinggi pada chip Error
+val IxhErrorBg = Color(0xFFFADadd)          // Latar chip/banner Error ("1 hari lagi" / Gagal)
+val IxhErrorText = Color(0xFF9E1922)        // Teks kontras tinggi pada chip Error
 
-val IxhInfoBg = Color(0xFFDCEBFA)           // Latar chip/banner Info ("Terbaca" / Pengumuman)
-val IxhInfoText = Color(0xFF1F5FA3)         // Teks kontras tinggi pada chip Info
+val IxhInfoBg = Color(0xFFD4E8FC)           // Latar chip/banner Info ("Terbaca" / Pengumuman)
+val IxhInfoText = Color(0xFF144985)         // Teks kontras tinggi pada chip Info
 
 // ============================================================================
 // Backward-Compatibility Aliases (Agar seluruh halaman lama tetap terkompilasi)

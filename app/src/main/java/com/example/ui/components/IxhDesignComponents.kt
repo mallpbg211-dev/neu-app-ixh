@@ -139,23 +139,25 @@ enum class BlobExpression(@DrawableRes val drawableRes: Int, val contentDesc: St
 }
 
 /**
- * Single-pass Neubrutalism offset shadow modifier to avoid extra Box nodes in the layout tree.
- * Optimized for 2 GB RAM devices by reducing layout passes and view hierarchy depth.
+ * Single-pass 2D Directional Neubrutalism offset shadow modifier.
+ * Optimized for 2 GB RAM devices by drawing directly on the Canvas without extra Box nodes.
  */
 fun Modifier.neubrutalShadow(
-    enabled: Boolean,
+    enabled: Boolean = true,
     cornerRadius: Dp,
-    offsetY: Dp = 3.dp,
+    offsetY: Dp = 4.dp,
+    offsetX: Dp = 2.8.dp,
     shadowColor: Color = IxhInk
 ): Modifier = if (!enabled) {
     this
 } else {
     this.drawBehind {
         val radiusPx = cornerRadius.toPx()
+        val dx = offsetX.toPx()
         val dy = offsetY.toPx()
         drawRoundRect(
             color = shadowColor,
-            topLeft = Offset(0f, dy),
+            topLeft = Offset(dx, dy),
             size = Size(size.width, size.height),
             cornerRadius = CornerRadius(radiusPx, radiusPx)
         )
@@ -198,10 +200,8 @@ fun IxhBlobMascot(
         }
     }
 
-    // Ekspresi visual yang sedang ditampilkan (mendukung kedipan natural sementara saat IDLE / FOCUS)
     var displayedExpression by remember(expression) { mutableStateOf(expression) }
 
-    // Animatable berbasis state yang dieksekusi di fase graphicsLayer (0 recomposition / 0 relayout)
     val offsetX = remember { Animatable(0f) }
     val offsetY = remember { Animatable(0f) }
     val scaleX = remember { Animatable(1f) }
@@ -214,7 +214,6 @@ fun IxhBlobMascot(
     LaunchedEffect(expression, animateBounce, animationTriggerKey, isLifecycleResumed) {
         displayedExpression = expression
 
-        // Hentikan animasi & kembalikan ke state netral saat layar tidak aktif / di background
         if (!isLifecycleResumed) {
             offsetX.snapTo(0f)
             offsetY.snapTo(0f)
@@ -224,7 +223,6 @@ fun IxhBlobMascot(
             return@LaunchedEffect
         }
 
-        // Reset halus ke posisi awal sebelum memulai animasi ekspresi baru
         coroutineScope {
             launch { offsetX.animateTo(0f, tween(140)) }
             launch { offsetY.animateTo(0f, tween(140)) }
@@ -235,7 +233,6 @@ fun IxhBlobMascot(
 
         when (expression) {
             BlobExpression.IDLE -> {
-                // Floating & breathing lembut terbatas (3 siklus tenang + 1 kedipan natural), lalu berhenti
                 repeat(3) { cycle ->
                     coroutineScope {
                         launch {
@@ -257,7 +254,6 @@ fun IxhBlobMascot(
                             )
                         }
                     }
-                    // Kedipan natural sekali di sela siklus napas
                     if (cycle == 1) {
                         displayedExpression = BlobExpression.BLINK
                         scaleY.animateTo(0.97f, tween(65))
@@ -289,7 +285,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.BLINK -> {
-                // Kedipan natural cepat
                 coroutineScope {
                     launch { scaleY.animateTo(0.955f, tween(75, easing = FastOutSlowInEasing)) }
                     launch { scaleX.animateTo(1.02f, tween(75, easing = FastOutSlowInEasing)) }
@@ -302,7 +297,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.SMILE -> {
-                // Bounce kecil ramah (1x atau 2x jika animateBounce aktif seperti di Splash)
                 val hops = if (animateBounce) 2 else 1
                 repeat(hops) {
                     coroutineScope {
@@ -351,7 +345,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.SAD -> {
-                // Gerakan menunduk lesu & menghela napas
                 coroutineScope {
                     launch {
                         offsetY.animateTo(
@@ -382,7 +375,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.FOCUS -> {
-                // Condong fokus & gerakan mata mengikuti baris input
                 coroutineScope {
                     launch { offsetY.animateTo(1.8f * dpToPx, tween(220)) }
                     launch { scaleX.animateTo(1.018f, tween(220)) }
@@ -394,7 +386,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.SLEEP -> {
-                // Breathing lambat & tenang (3 siklus napas lambat lalu diam hemat daya)
                 rotationZ.animateTo(-2.0f, tween(400, easing = FastOutSlowInEasing))
                 repeat(3) {
                     coroutineScope {
@@ -446,7 +437,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.PASSWORD_SHOW -> {
-                // Password terlihat -> Blob menutup mata (transisi halus menutup mata + anggukan kecil)
                 coroutineScope {
                     launch { scaleY.animateTo(0.955f, tween(110, easing = FastOutSlowInEasing)) }
                     launch { scaleX.animateTo(1.025f, tween(110, easing = FastOutSlowInEasing)) }
@@ -475,7 +465,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.PASSWORD_HIDE -> {
-                // Password tersembunyi -> mata Blob terbuka kembali (transisi responsif membuka mata)
                 coroutineScope {
                     launch { scaleY.animateTo(1.032f, tween(115, easing = LinearOutSlowInEasing)) }
                     launch { scaleX.animateTo(0.98f, tween(115, easing = LinearOutSlowInEasing)) }
@@ -504,7 +493,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.THINKING -> {
-                // Gerakan kecil memiringkan kepala saat berpikir
                 coroutineScope {
                     launch { rotationZ.animateTo(-3.8f, tween(300, easing = FastOutSlowInEasing)) }
                     launch { offsetY.animateTo(-2.2f * dpToPx, tween(300, easing = FastOutSlowInEasing)) }
@@ -517,7 +505,6 @@ fun IxhBlobMascot(
             }
 
             BlobExpression.EXCITED -> {
-                // Bounce lebih aktif & antusias (2x lompatan beruntun dengan squash-stretch kenyal)
                 repeat(2) { idx ->
                     val jumpHeight = if (idx == 0) -11.5f * dpToPx else -7.0f * dpToPx
                     val tilt = if (idx == 0) -3.8f else 3.5f
@@ -571,12 +558,11 @@ fun IxhBlobMascot(
         modifier = modifier
             .size(size)
             .drawBehind {
-                // Dynamic 3D ground contact shadow reinforcement that reacts to vertical bounce/float
                 val liftFactor = (-offsetY.value / (12f * dpToPx)).coerceIn(-0.35f, 1f)
                 val shadowScale = 1f - (liftFactor * 0.22f)
-                val shadowAlpha = (0.16f * (1f - liftFactor * 0.45f)).coerceIn(0.05f, 0.24f)
-                val shadowW = this.size.width * 0.56f * shadowScale
-                val shadowH = this.size.height * 0.085f * shadowScale
+                val shadowAlpha = (0.22f * (1f - liftFactor * 0.45f)).coerceIn(0.08f, 0.30f)
+                val shadowW = this.size.width * 0.58f * shadowScale
+                val shadowH = this.size.height * 0.095f * shadowScale
                 drawOval(
                     color = IxhInk.copy(alpha = shadowAlpha),
                     topLeft = Offset(
@@ -612,6 +598,9 @@ fun IxhBlobMascot(
     }
 }
 
+/**
+ * Sculpted Asymmetric Neubrutalist Card with Organic Curve Pocket & Bold Charcoal Outline.
+ */
 @Composable
 fun IxhCard(
     modifier: Modifier = Modifier,
@@ -625,18 +614,20 @@ fun IxhCard(
 ) {
     val design = LocalIxhDesign.current
     val isGlass = design.style == VisualThemeStyle.LIQUID_GLASS
-    val cornerRadius = design.cardCornerRadius
-    val shape = RoundedCornerShape(cornerRadius)
-    val resolvedBorderColor = borderColor ?: when {
-        hasHardShadow && !isGlass -> IxhInk
-        isGlass -> IxhGlassBorder
-        else -> IxhBorder
+    // Asymmetric sculpted corners give every card an intentional organic-neubrutalist silhouette
+    val shape = if (hasHardShadow) {
+        RoundedCornerShape(topStart = 22.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 24.dp)
+    } else {
+        RoundedCornerShape(topStart = 18.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
     }
+    val resolvedBorderColor = borderColor ?: if (isGlass) IxhGlassBorder else IxhInk
     val borderWidth = when {
-        hasHardShadow && !isGlass -> design.primaryStrokeWidth
-        isGlass -> 1.dp
-        else -> design.secondaryStrokeWidth
+        isGlass -> 1.2.dp
+        hasHardShadow -> 2.4.dp
+        else -> 1.9.dp
     }
+    val shadowOffset = if (hasHardShadow) 4.dp else 2.2.dp
+    val shadowOffsetX = if (hasHardShadow) 3.dp else 1.6.dp
 
     val clickMod = if (onClick != null) {
         Modifier.clickable(onClick = onClick)
@@ -648,21 +639,56 @@ fun IxhCard(
         modifier = modifier
             .fillMaxWidth()
             .neubrutalShadow(
-                enabled = hasHardShadow && !isGlass,
-                cornerRadius = cornerRadius,
-                offsetY = design.shadowOffsetY
+                enabled = !isGlass,
+                cornerRadius = 18.dp,
+                offsetY = shadowOffset,
+                offsetX = shadowOffsetX,
+                shadowColor = IxhInk
             )
             .clip(shape)
             .background(backgroundColor, shape)
+            .drawBehind {
+                // Subtle organic wave accent in the bottom-right corner of yellow/featured cards
+                if (backgroundColor == IxhYellow || backgroundColor == IxhYellowLight) {
+                    val w = size.width
+                    val h = size.height
+                    val wave = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(w * 0.58f, h)
+                        cubicTo(
+                            w * 0.70f, h * 0.74f,
+                            w * 0.86f, h * 0.62f,
+                            w, h * 0.44f
+                        )
+                        lineTo(w, h)
+                        close()
+                    }
+                    drawPath(
+                        path = wave,
+                        color = if (backgroundColor == IxhYellow) {
+                            Color(0xFFFFE066).copy(alpha = 0.65f)
+                        } else {
+                            IxhYellow.copy(alpha = 0.28f)
+                        }
+                    )
+                }
+            }
             .border(borderWidth, resolvedBorderColor, shape)
             .then(clickMod)
     ) {
         if (leftStripeColor != null) {
             Box(
                 modifier = Modifier
-                    .width(5.dp)
-                    .height(76.dp)
+                    .width(8.dp)
+                    .height(82.dp)
                     .background(leftStripeColor)
+                    .drawBehind {
+                        drawLine(
+                            color = IxhInk,
+                            start = Offset(size.width, 0f),
+                            end = Offset(size.width, size.height),
+                            strokeWidth = 2.dp.toPx()
+                        )
+                    }
             )
         }
         Column(
@@ -685,30 +711,43 @@ fun IxhPrimaryButton(
 ) {
     val design = LocalIxhDesign.current
     val isGlass = design.style == VisualThemeStyle.LIQUID_GLASS
-    val cornerRadius = design.buttonCornerRadius
-    val shape = RoundedCornerShape(cornerRadius)
+    val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 13.dp, bottomStart = 13.dp, bottomEnd = 22.dp)
     val bgColor = if (enabled) IxhYellow else IxhSurfaceMuted
     val textColor = if (enabled) IxhInk else IxhTextSecondary
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(50.dp)
             .let { if (testTag != null) it.testTag(testTag) else it }
             .neubrutalShadow(
                 enabled = !isGlass && enabled,
-                cornerRadius = cornerRadius,
-                offsetY = design.shadowOffsetY
+                cornerRadius = 18.dp,
+                offsetY = 4.dp,
+                offsetX = 3.dp
             )
             .clip(shape)
             .background(bgColor, shape)
+            .drawBehind {
+                if (enabled) {
+                    val w = size.width
+                    val h = size.height
+                    val highlightWave = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(0f, 0f)
+                        lineTo(w * 0.42f, 0f)
+                        cubicTo(w * 0.32f, h * 0.45f, w * 0.14f, h * 0.65f, 0f, h * 0.82f)
+                        close()
+                    }
+                    drawPath(highlightWave, color = Color(0xFFFFDE6A).copy(alpha = 0.55f))
+                }
+            }
             .border(
-                width = if (isGlass) 0.dp else design.primaryStrokeWidth,
-                color = if (isGlass) Color.Transparent else if (enabled) IxhInk else IxhBorder,
+                width = if (isGlass) 0.dp else 2.4.dp,
+                color = if (isGlass) Color.Transparent else IxhInk,
                 shape = shape
             )
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 18.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -717,7 +756,7 @@ fun IxhPrimaryButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = textColor,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(19.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
@@ -725,7 +764,8 @@ fun IxhPrimaryButton(
             text = text,
             style = MaterialTheme.typography.labelLarge,
             color = textColor,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 13.sp
         )
     }
 }
@@ -741,22 +781,30 @@ fun IxhSecondaryButton(
 ) {
     val design = LocalIxhDesign.current
     val isGlass = design.style == VisualThemeStyle.LIQUID_GLASS
-    val shape = RoundedCornerShape(design.buttonCornerRadius)
+    val shape = RoundedCornerShape(topStart = 18.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
     val strokeColor = when {
         isDanger -> IxhRed
         isGlass -> IxhGlassBorder
         else -> IxhInk
     }
+    val bgColor = if (isDanger) IxhRedBg else IxhWhite
     val contentColor = if (isDanger) IxhRed else IxhInk
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(46.dp)
+            .height(48.dp)
             .let { if (testTag != null) it.testTag(testTag) else it }
+            .neubrutalShadow(
+                enabled = !isGlass,
+                cornerRadius = 16.dp,
+                offsetY = 3.dp,
+                offsetX = 2.2.dp,
+                shadowColor = strokeColor
+            )
             .clip(shape)
-            .background(IxhWhite, shape)
-            .border(design.secondaryStrokeWidth, strokeColor, shape)
+            .background(bgColor, shape)
+            .border(2.2.dp, strokeColor, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.Center,
@@ -775,7 +823,8 @@ fun IxhSecondaryButton(
             text = text,
             style = MaterialTheme.typography.labelLarge,
             color = contentColor,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 12.5.sp
         )
     }
 }
@@ -791,29 +840,26 @@ fun IxhStatusChip(
     modifier: Modifier = Modifier
 ) {
     val (bg, fg, borderCol) = when (tone) {
-        ChipTone.GREEN -> Triple(IxhGreenBg, IxhGreenText, Color.Transparent)
-        ChipTone.YELLOW -> Triple(IxhAmberBg, IxhAmberText, Color.Transparent)
-        ChipTone.BLUE -> Triple(IxhBlueBg, IxhBlueText, Color.Transparent)
-        ChipTone.RED -> Triple(IxhRedBg, IxhRed, Color.Transparent)
-        ChipTone.NEUTRAL -> Triple(IxhSurfaceMuted, IxhTextSecondary, Color.Transparent)
+        ChipTone.GREEN -> Triple(IxhGreenBg, IxhGreenText, IxhInk)
+        ChipTone.YELLOW -> Triple(IxhYellow, IxhInk, IxhInk)
+        ChipTone.BLUE -> Triple(IxhBlueBg, IxhBlueText, IxhInk)
+        ChipTone.RED -> Triple(IxhRedBg, IxhRed, IxhInk)
+        ChipTone.NEUTRAL -> Triple(IxhSurfaceMuted, IxhInk, IxhInk)
         ChipTone.OUTLINE_YELLOW -> Triple(IxhYellow, IxhInk, IxhInk)
     }
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(topStart = 12.dp, topEnd = 8.dp, bottomStart = 8.dp, bottomEnd = 14.dp)
     Box(
         modifier = modifier
             .clip(shape)
             .background(bg, shape)
-            .then(
-                if (borderCol != Color.Transparent) Modifier.border(1.5.dp, borderCol, shape)
-                else Modifier
-            )
-            .padding(horizontal = 10.dp, vertical = 3.5.dp),
+            .border(1.6.dp, borderCol, shape)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             fontSize = 10.5.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = fg
         )
     }
@@ -825,15 +871,22 @@ fun IxhCircleIcon(
     modifier: Modifier = Modifier,
     bgColor: Color = IxhYellowLight,
     iconTint: Color = IxhInk,
-    hasBorder: Boolean = false,
-    size: Dp = 36.dp
+    hasBorder: Boolean = true,
+    size: Dp = 38.dp
 ) {
+    val podShape = RoundedCornerShape(topStart = size * 0.42f, topEnd = size * 0.28f, bottomStart = size * 0.28f, bottomEnd = size * 0.46f)
     Box(
         modifier = modifier
             .size(size)
-            .clip(CircleShape)
-            .background(bgColor, CircleShape)
-            .then(if (hasBorder) Modifier.border(1.5.dp, IxhInk, CircleShape) else Modifier),
+            .neubrutalShadow(
+                enabled = hasBorder,
+                cornerRadius = size * 0.35f,
+                offsetY = 2.2.dp,
+                offsetX = 1.8.dp
+            )
+            .clip(podShape)
+            .background(bgColor, podShape)
+            .border(if (hasBorder) 2.dp else 1.5.dp, IxhInk, podShape),
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -854,43 +907,73 @@ fun IxhAlertBanner(
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val (bg, borderCol) = when (tone) {
+    val (bg, accentCol) = when (tone) {
         ChipTone.RED -> IxhRedBg to IxhRed
-        ChipTone.YELLOW -> IxhAlertYellowBg to IxhAmber
+        ChipTone.YELLOW -> IxhYellowLight to IxhYellow
         ChipTone.GREEN -> IxhGreenBg to IxhGreen
         else -> IxhBlueBg to IxhBlue
     }
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp)
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .neubrutalShadow(
+                enabled = true,
+                cornerRadius = 16.dp,
+                offsetY = 3.dp,
+                offsetX = 2.2.dp,
+                shadowColor = IxhInk
+            )
             .clip(shape)
             .background(bg, shape)
-            .border(1.5.dp, borderCol, shape)
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                val leftWave = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(w * 0.16f, 0f)
+                    cubicTo(w * 0.12f, h * 0.45f, w * 0.20f, h * 0.75f, w * 0.08f, h)
+                    lineTo(0f, h)
+                    close()
+                }
+                drawPath(leftWave, color = accentCol.copy(alpha = 0.28f))
+            }
+            .border(2.2.dp, IxhInk, shape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 13.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = borderCol,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(10.dp))
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(if (tone == ChipTone.YELLOW) IxhYellow else IxhWhite)
+                .border(1.8.dp, IxhInk, RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (tone == ChipTone.RED) IxhRed else IxhInk,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(11.dp))
         Column(modifier = Modifier.weight(1f)) {
             if (title != null) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelLarge,
                     color = if (tone == ChipTone.RED) IxhRed else IxhInk,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
+                Spacer(modifier = Modifier.height(1.dp))
             }
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
-                color = IxhInk
+                color = IxhInk,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -905,29 +988,26 @@ fun IxhNeubrutalToggle(
 ) {
     val design = LocalIxhDesign.current
     val isGlass = design.style == VisualThemeStyle.LIQUID_GLASS
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(13.dp)
     val bgColor = if (checked) IxhYellow else IxhSurfaceMuted
     Box(
         modifier = modifier
-            .width(44.dp)
-            .height(24.dp)
+            .width(48.dp)
+            .height(26.dp)
+            .neubrutalShadow(enabled = !isGlass, cornerRadius = 13.dp, offsetY = 2.dp, offsetX = 1.5.dp)
             .clip(shape)
             .background(bgColor, shape)
-            .then(
-                if (!isGlass) Modifier.border(2.dp, IxhInk, shape) else Modifier
-            )
+            .border(2.2.dp, IxhInk, shape)
             .clickable(enabled = enabled) { onCheckedChange(!checked) }
-            .padding(horizontal = 3.dp),
+            .padding(horizontal = 3.5.dp),
         contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         Box(
             modifier = Modifier
-                .size(15.dp)
+                .size(16.dp)
                 .clip(CircleShape)
-                .background(
-                    if (isGlass) IxhWhite else if (checked) IxhInk else IxhTextSecondary,
-                    CircleShape
-                )
+                .background(if (checked) IxhInk else IxhWhite, CircleShape)
+                .border(1.5.dp, IxhInk, CircleShape)
         )
     }
 }
@@ -940,44 +1020,39 @@ fun IxhSegmentedTabs(
     badgeMap: Map<Int, Int> = emptyMap(),
     modifier: Modifier = Modifier
 ) {
-    val design = LocalIxhDesign.current
-    val isGlass = design.style == VisualThemeStyle.LIQUID_GLASS
+    val dockShape = RoundedCornerShape(topStart = 18.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(IxhSurfaceMuted)
-            .padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+            .neubrutalShadow(enabled = true, cornerRadius = 16.dp, offsetY = 3.dp, offsetX = 2.2.dp)
+            .clip(dockShape)
+            .background(IxhWhite, dockShape)
+            .border(2.2.dp, IxhInk, dockShape)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         tabs.forEachIndexed { idx, label ->
             val isSelected = idx == selectedIndex
-            val itemShape = RoundedCornerShape(10.dp)
+            val itemShape = RoundedCornerShape(topStart = 13.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 14.dp)
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .clip(itemShape)
-                    .background(
-                        when {
-                            isSelected && isGlass -> IxhWhite
-                            isSelected -> IxhYellow
-                            else -> Color.Transparent
-                        }
-                    )
+                    .background(if (isSelected) IxhYellow else Color.Transparent)
                     .then(
-                        if (isSelected && !isGlass) Modifier.border(1.5.dp, IxhInk, itemShape)
+                        if (isSelected) Modifier.border(2.dp, IxhInk, itemShape)
                         else Modifier
                     )
                     .clickable { onTabSelected(idx) }
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 8.5.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isSelected) IxhInk else IxhTextSecondary
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
+                    color = IxhInk
                 )
                 val badgeCount = badgeMap[idx] ?: 0
                 if (badgeCount > 0) {
@@ -985,15 +1060,16 @@ fun IxhSegmentedTabs(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(IxhRed)
+                            .background(if (isSelected) IxhInk else IxhRed)
+                            .border(1.2.dp, IxhInk, CircleShape)
                             .padding(horizontal = 6.dp, vertical = 1.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = badgeCount.toString(),
-                            color = Color.White,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold
+                            color = if (isSelected) IxhYellow else Color.White,
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.ExtraBold
                         )
                     }
                 }
@@ -1010,24 +1086,29 @@ fun IxhWaBubblePreview(
     outgoingReply: String? = null,
     modifier: Modifier = Modifier
 ) {
+    val outerShape = RoundedCornerShape(topStart = 18.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(IxhWaChatBg)
-            .padding(10.dp)
+            .neubrutalShadow(enabled = true, cornerRadius = 16.dp, offsetY = 3.dp, offsetX = 2.dp)
+            .clip(outerShape)
+            .background(IxhWaChatBg, outerShape)
+            .border(2.dp, IxhInk, outerShape)
+            .padding(11.dp)
     ) {
+        val bubbleShape = RoundedCornerShape(topStart = 4.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 14.dp)
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
-                .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 12.dp))
-                .background(IxhWhite)
+                .clip(bubbleShape)
+                .background(IxhWhite, bubbleShape)
+                .border(1.8.dp, IxhInk, bubbleShape)
                 .padding(10.dp)
         ) {
             Text(
                 text = senderTitle,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.ExtraBold,
                 color = IxhWaHeader
             )
             Spacer(modifier = Modifier.height(3.dp))
@@ -1035,6 +1116,7 @@ fun IxhWaBubblePreview(
                 text = messageBody,
                 style = MaterialTheme.typography.bodySmall,
                 color = IxhInk,
+                fontWeight = FontWeight.Medium,
                 lineHeight = 16.sp
             )
             Text(
@@ -1046,17 +1128,19 @@ fun IxhWaBubblePreview(
         }
         if (outgoingReply != null) {
             Spacer(modifier = Modifier.height(8.dp))
+            val replyShape = RoundedCornerShape(topStart = 14.dp, topEnd = 4.dp, bottomEnd = 14.dp, bottomStart = 14.dp)
             Column(
                 modifier = Modifier
                     .align(Alignment.End)
-                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 3.dp, bottomEnd = 12.dp, bottomStart = 12.dp))
-                    .background(IxhWaBubbleSent)
+                    .clip(replyShape)
+                    .background(IxhWaBubbleSent, replyShape)
+                    .border(1.8.dp, IxhInk, replyShape)
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Text(
                     text = outgoingReply,
                     style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = IxhInk
                 )
                 Text(
@@ -1075,23 +1159,32 @@ fun IxhDonutChart(
     centerValueText: String,
     centerSubText: String,
     segments: List<Pair<Float, Color>>,
-    size: Dp = 96.dp,
+    size: Dp = 104.dp,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.size(size), contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.matchParentSize().padding(8.dp)) {
             val total = segments.sumOf { it.first.toDouble() }.toFloat().coerceAtLeast(1f)
             var startAngle = -90f
-            val stroke = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Butt)
+            val outerBorderStroke = Stroke(width = 16.dp.toPx(), cap = StrokeCap.Butt)
+            val fillStroke = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Butt)
+            // Base charcoal ring casing for bold Neubrutalist gauge look
+            drawArc(
+                color = IxhInk,
+                startAngle = 0f,
+                sweepAngle = 360f,
+                useCenter = false,
+                style = outerBorderStroke
+            )
             segments.forEach { (value, color) ->
                 val sweep = (value / total) * 360f
                 if (sweep > 0f) {
                     drawArc(
                         color = color,
                         startAngle = startAngle,
-                        sweepAngle = (sweep - 2f).coerceAtLeast(1f),
+                        sweepAngle = (sweep - 3f).coerceAtLeast(1f),
                         useCenter = false,
-                        style = stroke
+                        style = fillStroke
                     )
                     startAngle += sweep
                 }
@@ -1105,9 +1198,11 @@ fun IxhDonutChart(
                 color = IxhInk
             )
             Text(
-                text = centerSubText,
+                text = centerSubText.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = IxhTextSecondary
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk,
+                fontSize = 9.sp
             )
         }
     }
@@ -1134,23 +1229,56 @@ fun IxhEmptyStateCard(
     actionTestTag: String? = null,
     testTag: String? = null
 ) {
-    IxhCard(
+    val emptyShape = RoundedCornerShape(topStart = 26.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 30.dp)
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .let { if (testTag != null) it.testTag(testTag) else it },
-        backgroundColor = IxhWhite,
-        hasHardShadow = true,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+            .let { if (testTag != null) it.testTag(testTag) else it }
+            .neubrutalShadow(enabled = true, cornerRadius = 22.dp, offsetY = 4.5.dp, offsetX = 3.dp)
+            .clip(emptyShape)
+            .background(IxhWhite, emptyShape)
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                // Organic flowing yellow wave across top & bottom-right of empty state
+                val topWave = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(w * 0.45f, 0f)
+                    cubicTo(w * 0.34f, h * 0.18f, w * 0.15f, h * 0.24f, 0f, h * 0.36f)
+                    close()
+                }
+                drawPath(topWave, color = IxhYellowLight.copy(alpha = 0.85f))
+
+                val bottomWave = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(w * 0.52f, h)
+                    cubicTo(w * 0.68f, h * 0.82f, w * 0.85f, h * 0.76f, w, h * 0.62f)
+                    lineTo(w, h)
+                    close()
+                }
+                drawPath(bottomWave, color = IxhYellow.copy(alpha = 0.32f))
+            }
+            .border(2.4.dp, IxhInk, emptyShape)
+            .padding(horizontal = 18.dp, vertical = 18.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            IxhBlobMascot(
-                expression = mascotState,
-                size = 78.dp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(86.dp)
+                    .neubrutalShadow(enabled = true, cornerRadius = 24.dp, offsetY = 3.dp, offsetX = 2.dp)
+                    .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 28.dp))
+                    .background(IxhYellowLight)
+                    .border(2.2.dp, IxhInk, RoundedCornerShape(topStart = 26.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 28.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                IxhBlobMascot(
+                    expression = mascotState,
+                    size = 74.dp
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
@@ -1163,10 +1291,11 @@ fun IxhEmptyStateCard(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = IxhTextSecondary,
+                fontWeight = FontWeight.Medium,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
             if (actionText != null && onActionClick != null) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(14.dp))
                 IxhPrimaryButton(
                     text = actionText,
                     onClick = onActionClick,
@@ -1199,28 +1328,29 @@ fun IxhTopBrandHeader(
         Row(verticalAlignment = Alignment.CenterVertically) {
             IxhBlobMascotSlot(
                 slotStyle = IxhBlobSlotStyle.APP_BADGE_3D,
-                size = 38.dp
+                size = 40.dp
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "IX-H HUB",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(5.dp))
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
+                            .neubrutalShadow(enabled = !isGlass, cornerRadius = 7.dp, offsetY = 2.dp, offsetX = 1.5.dp)
+                            .clip(RoundedCornerShape(7.dp))
                             .background(IxhYellow)
-                            .border(1.2.dp, IxhInk, RoundedCornerShape(6.dp))
-                            .padding(horizontal = 5.dp, vertical = 0.5.dp)
+                            .border(1.8.dp, IxhInk, RoundedCornerShape(7.dp))
+                            .padding(horizontal = 6.dp, vertical = 1.dp)
                     ) {
                         Text(
                             text = "1.0",
-                            fontSize = 9.5.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = IxhInk
                         )
@@ -1229,6 +1359,7 @@ fun IxhTopBrandHeader(
                 Text(
                     text = "Kelas IX-H • SMPN 1 Bojongsari",
                     style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
                     color = IxhTextSecondary
                 )
             }
@@ -1236,23 +1367,22 @@ fun IxhTopBrandHeader(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
         ) {
+            val rolePillShape = RoundedCornerShape(topStart = 14.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 15.dp)
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(IxhYellow)
-                    .then(
-                        if (!isGlass) Modifier.border(1.5.dp, IxhInk, RoundedCornerShape(14.dp))
-                        else Modifier
-                    )
+                    .neubrutalShadow(enabled = !isGlass, cornerRadius = 12.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                    .clip(rolePillShape)
+                    .background(IxhYellow, rolePillShape)
+                    .border(2.dp, IxhInk, rolePillShape)
                     .clickable(onClick = onRoleBadgeClick)
-                    .padding(horizontal = 9.dp, vertical = 4.dp)
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
                     .testTag("role_badge_button")
             ) {
                 Text(
                     text = roleLabel,
-                    fontSize = 9.5.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
@@ -1261,24 +1391,26 @@ fun IxhTopBrandHeader(
             if (onSearchClick != null) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(38.dp)
                         .clickable(onClick = onSearchClick)
                         .testTag("header_search_button"),
                     contentAlignment = Alignment.Center
                 ) {
+                    val btnShape = RoundedCornerShape(topStart = 14.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(IxhWhite)
-                            .border(1.5.dp, if (isGlass) IxhGlassBorder else IxhInk, CircleShape),
+                            .size(36.dp)
+                            .neubrutalShadow(enabled = !isGlass, cornerRadius = 12.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                            .clip(btnShape)
+                            .background(IxhWhite, btnShape)
+                            .border(2.dp, IxhInk, btnShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Search,
                             contentDescription = "Cari",
                             tint = IxhInk,
-                            modifier = Modifier.size(17.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -1286,22 +1418,24 @@ fun IxhTopBrandHeader(
 
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(38.dp)
                     .clickable(onClick = onNotificationsClick)
                     .testTag("header_notifications_button"),
                 contentAlignment = Alignment.Center
             ) {
+                val notifShape = RoundedCornerShape(topStart = 14.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(IxhWhite)
-                        .border(1.5.dp, if (isGlass) IxhGlassBorder else IxhInk, CircleShape),
+                        .size(36.dp)
+                        .neubrutalShadow(enabled = !isGlass, cornerRadius = 12.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                        .clip(notifShape)
+                        .background(IxhWhite, notifShape)
+                        .border(2.dp, IxhInk, notifShape),
                     contentAlignment = Alignment.Center
                 ) {
                     IxhDualToneSystemIcon(
                         iconType = IxhSystemIconType.NOTIFIKASI,
-                        size = 18.dp
+                        size = 19.dp
                     )
                 }
                 if (unreadNotificationCount > 0) {
@@ -1310,6 +1444,7 @@ fun IxhTopBrandHeader(
                             .align(Alignment.TopEnd)
                             .clip(CircleShape)
                             .background(IxhRed)
+                            .border(1.5.dp, IxhInk, CircleShape)
                             .padding(horizontal = 5.dp, vertical = 1.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -1317,28 +1452,27 @@ fun IxhTopBrandHeader(
                             text = unreadNotificationCount.toString(),
                             color = Color.White,
                             fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.ExtraBold
                         )
                     }
                 }
             }
 
+            val profShape = RoundedCornerShape(topStart = 14.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
             Box(
                 modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(IxhYellow)
-                    .then(
-                        if (!isGlass) Modifier.border(1.8.dp, IxhInk, CircleShape)
-                        else Modifier
-                    )
+                    .size(36.dp)
+                    .neubrutalShadow(enabled = !isGlass, cornerRadius = 12.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                    .clip(profShape)
+                    .background(IxhYellow, profShape)
+                    .border(2.dp, IxhInk, profShape)
                     .clickable(onClick = onProfileClick)
                     .testTag("header_profile_button"),
                 contentAlignment = Alignment.Center
             ) {
                 IxhDualToneSystemIcon(
                     iconType = IxhSystemIconType.PROFIL,
-                    size = 18.dp
+                    size = 19.dp
                 )
             }
         }
@@ -1346,9 +1480,9 @@ fun IxhTopBrandHeader(
 }
 
 /**
- * Signature Organic Greeting Card for IX-H HUB 1.0 (Master Prompt Final V2 §6 & §10.2)
- * Combines asymmetric organic curves, warm yellow-cream layered waves, subtle halftone dots,
- * 3D Glossy Blob Mascot, and integrated Global Search + Offline-First Sync status bar.
+ * Signature Sculpted Organic Greeting Card for IX-H HUB 1.0
+ * Features multi-layered flowing S-curves, Charcoal contour lines, halftone matrix,
+ * high-contrast Charcoal ribbon badges, 3D Glossy Blob Mascot pod, and Global Search dock.
  */
 @Composable
 fun IxhOrganicGreetingCard(
@@ -1363,45 +1497,60 @@ fun IxhOrganicGreetingCard(
     modifier: Modifier = Modifier,
     blobExpression: BlobExpression = BlobExpression.SMILE
 ) {
-    val cardShape = RoundedCornerShape(topStart = 24.dp, topEnd = 28.dp, bottomStart = 24.dp, bottomEnd = 32.dp)
+    val cardShape = RoundedCornerShape(topStart = 30.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 36.dp)
     Box(
         modifier = modifier
             .fillMaxWidth()
             .neubrutalShadow(
                 enabled = true,
-                cornerRadius = 24.dp,
-                offsetY = 4.dp,
+                cornerRadius = 26.dp,
+                offsetY = 5.dp,
+                offsetX = 3.5.dp,
                 shadowColor = IxhInk
             )
             .clip(cardShape)
             .background(IxhYellow, cardShape)
-            .border(2.2.dp, IxhInk, cardShape)
+            .border(2.6.dp, IxhInk, cardShape)
             .drawBehind {
                 val w = size.width
                 val h = size.height
 
-                // Asymmetric organic cream wave pocket in bottom-right & top-right
+                // 1. Sculpted Organic Golden-Cream Wave sweeping across top-right
                 val upperWave = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(w * 0.52f, 0f)
+                    moveTo(w * 0.44f, 0f)
                     cubicTo(
-                        w * 0.68f, h * 0.12f,
-                        w * 0.76f, h * 0.42f,
-                        w, h * 0.34f
+                        w * 0.62f, h * 0.16f,
+                        w * 0.72f, h * 0.48f,
+                        w, h * 0.38f
                     )
                     lineTo(w, 0f)
                     close()
                 }
                 drawPath(
                     path = upperWave,
-                    color = Color(0xFFFFE57F).copy(alpha = 0.72f)
+                    color = Color(0xFFFFE47A).copy(alpha = 0.85f)
+                )
+                val upperWaveContour = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(w * 0.44f, 0f)
+                    cubicTo(
+                        w * 0.62f, h * 0.16f,
+                        w * 0.72f, h * 0.48f,
+                        w, h * 0.38f
+                    )
+                }
+                drawPath(
+                    path = upperWaveContour,
+                    color = IxhInk.copy(alpha = 0.18f),
+                    style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
                 )
 
+                // 2. Flowing Lower S-Wave Pocket with Charcoal Rim Accent
                 val lowerWave = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(0f, h * 0.76f)
+                    moveTo(0f, h * 0.68f)
                     cubicTo(
-                        w * 0.28f, h * 0.64f,
-                        w * 0.62f, h * 0.90f,
-                        w, h * 0.66f
+                        w * 0.32f, h * 0.54f,
+                        w * 0.58f, h * 0.88f,
+                        w, h * 0.60f
                     )
                     lineTo(w, h)
                     lineTo(0f, h)
@@ -1409,22 +1558,35 @@ fun IxhOrganicGreetingCard(
                 }
                 drawPath(
                     path = lowerWave,
-                    color = Color(0xFFFDF8EC).copy(alpha = 0.28f)
+                    color = Color(0xFFFFB703).copy(alpha = 0.34f)
+                )
+                val lowerWaveContour = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(0f, h * 0.68f)
+                    cubicTo(
+                        w * 0.32f, h * 0.54f,
+                        w * 0.58f, h * 0.88f,
+                        w, h * 0.60f
+                    )
+                }
+                drawPath(
+                    path = lowerWaveContour,
+                    color = IxhInk.copy(alpha = 0.22f),
+                    style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
                 )
 
-                // Subtle halftone dots in top-right corner (lightweight single-pass circles)
-                val dotColor = IxhInk.copy(alpha = 0.08f)
-                val step = 13.dp.toPx()
+                // 3. Bold Halftone Dots in Top-Right & Bottom-Left Corners
+                val dotColor = IxhInk.copy(alpha = 0.13f)
+                val step = 12.dp.toPx()
                 for (row in 0..3) {
                     for (col in 0..5) {
-                        val cx = w - (col * step) - 16.dp.toPx()
-                        val cy = (row * step) + 16.dp.toPx()
-                        val r = (2.2f - row * 0.35f).coerceAtLeast(1f).dp.toPx()
+                        val cx = w - (col * step) - 14.dp.toPx()
+                        val cy = (row * step) + 14.dp.toPx()
+                        val r = (2.4f - row * 0.35f).coerceAtLeast(1.1f).dp.toPx()
                         drawCircle(color = dotColor, radius = r, center = Offset(cx, cy))
                     }
                 }
             }
-            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .padding(horizontal = 16.dp, vertical = 15.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -1437,12 +1599,21 @@ fun IxhOrganicGreetingCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Box(
+                        val roleBadgeShape = RoundedCornerShape(topStart = 12.dp, topEnd = 8.dp, bottomStart = 8.dp, bottomEnd = 14.dp)
+                        Row(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(999.dp))
+                                .clip(roleBadgeShape)
                                 .background(IxhInk)
-                                .padding(horizontal = 10.dp, vertical = 3.dp)
+                                .padding(horizontal = 10.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(IxhYellow)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
                             Text(
                                 text = subRoleLabel.uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
@@ -1454,28 +1625,28 @@ fun IxhOrganicGreetingCard(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(999.dp))
-                                .background(IxhWhite.copy(alpha = 0.92f))
-                                .border(1.2.dp, IxhInk, RoundedCornerShape(999.dp))
+                                .background(IxhWhite)
+                                .border(1.8.dp, IxhInk, RoundedCornerShape(999.dp))
                                 .clickable(onClick = onSyncStatusClick)
-                                .padding(horizontal = 8.dp, vertical = 2.5.dp)
+                                .padding(horizontal = 9.dp, vertical = 3.dp)
                                 .testTag("greeting_sync_pill")
                         ) {
                             Text(
                                 text = if (pendingSyncCount > 0) "Lokal • $pendingSyncCount Antrean" else syncStatusLabel,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = IxhInk,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 fontSize = 9.5.sp
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(9.dp))
                     Text(
                         text = greetingTitle,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = IxhInk.copy(alpha = 0.82f),
-                        fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.labelLarge,
+                        color = IxhInk,
+                        fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = userName,
@@ -1488,36 +1659,40 @@ fun IxhOrganicGreetingCard(
                     Text(
                         text = classSubTitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = IxhInk.copy(alpha = 0.85f),
-                        fontWeight = FontWeight.Medium
+                        color = IxhInk,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
+                val mascotPodShape = RoundedCornerShape(topStart = 26.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 28.dp)
                 Box(
                     modifier = Modifier
-                        .size(78.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(IxhCream.copy(alpha = 0.72f))
-                        .border(1.6.dp, IxhInk, RoundedCornerShape(22.dp)),
+                        .size(82.dp)
+                        .neubrutalShadow(enabled = true, cornerRadius = 22.dp, offsetY = 3.5.dp, offsetX = 2.5.dp)
+                        .clip(mascotPodShape)
+                        .background(IxhCream, mascotPodShape)
+                        .border(2.4.dp, IxhInk, mascotPodShape),
                     contentAlignment = Alignment.Center
                 ) {
                     IxhBlobMascot(
                         expression = blobExpression,
-                        size = 70.dp
+                        size = 72.dp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            // Integrated Global Search Bar Trigger inside the Organic Greeting Card
+            Spacer(modifier = Modifier.height(13.dp))
+            // Integrated High-Contrast Global Search Bar Trigger inside the Organic Greeting Card
+            val searchDockShape = RoundedCornerShape(topStart = 16.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 18.dp)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(IxhWhite)
-                    .border(1.8.dp, IxhInk, RoundedCornerShape(14.dp))
+                    .height(46.dp)
+                    .neubrutalShadow(enabled = true, cornerRadius = 15.dp, offsetY = 3.dp, offsetX = 2.dp)
+                    .clip(searchDockShape)
+                    .background(IxhWhite, searchDockShape)
+                    .border(2.2.dp, IxhInk, searchDockShape)
                     .clickable(onClick = onSearchBarClick)
                     .padding(horizontal = 12.dp)
                     .testTag("dashboard_global_search_bar"),
@@ -1532,13 +1707,14 @@ fun IxhOrganicGreetingCard(
                         imageVector = Icons.Outlined.Search,
                         contentDescription = "Cari",
                         tint = IxhInk,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(19.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Cari siswa, tugas, jadwal, kas, pengumuman...",
                         style = MaterialTheme.typography.bodySmall,
                         color = IxhTextSecondary,
+                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1546,16 +1722,16 @@ fun IxhOrganicGreetingCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(IxhSurfaceMuted)
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(IxhInk)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "CARI",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk,
-                        fontSize = 9.sp,
+                        color = IxhYellow,
+                        fontSize = 9.5.sp,
                         maxLines = 1
                     )
                 }
@@ -1564,6 +1740,172 @@ fun IxhOrganicGreetingCard(
     }
 }
 
+/**
+ * Purpose-Built Sculpted Organic Module Banner for Domain Screens
+ * (Absensi, Kas, Jadwal, Tugas, Pengumuman, Pencarian, Backup, Audit Log, Bot).
+ */
+@Composable
+fun IxhOrganicModuleBanner(
+    eyebrowTag: String,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    iconType: IxhSystemIconType? = null,
+    containerColor: Color = IxhYellow,
+    accentWaveColor: Color = Color(0xFFFFE47A),
+    rightBadgeContent: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = rightBadgeContent
+) {
+    val bannerShape = RoundedCornerShape(topStart = 26.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 30.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .neubrutalShadow(enabled = true, cornerRadius = 22.dp, offsetY = 4.dp, offsetX = 3.dp)
+            .clip(bannerShape)
+            .background(containerColor, bannerShape)
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                val wave = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(w * 0.42f, 0f)
+                    cubicTo(
+                        w * 0.58f, h * 0.35f,
+                        w * 0.76f, h * 0.25f,
+                        w, h * 0.68f
+                    )
+                    lineTo(w, 0f)
+                    close()
+                }
+                drawPath(wave, color = accentWaveColor.copy(alpha = 0.78f))
+
+                val contour = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(w * 0.42f, 0f)
+                    cubicTo(
+                        w * 0.58f, h * 0.35f,
+                        w * 0.76f, h * 0.25f,
+                        w, h * 0.68f
+                    )
+                }
+                drawPath(
+                    path = contour,
+                    color = IxhInk.copy(alpha = 0.18f),
+                    style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
+                )
+            }
+            .border(2.4.dp, IxhInk, bannerShape)
+            .padding(horizontal = 15.dp, vertical = 13.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    if (iconType != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(26.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(IxhWhite)
+                                .border(1.8.dp, IxhInk, RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IxhDualToneSystemIcon(iconType = iconType, size = 16.dp)
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 6.dp, bottomStart = 6.dp, bottomEnd = 10.dp))
+                            .background(IxhInk)
+                            .padding(horizontal = 9.dp, vertical = 2.5.dp)
+                    ) {
+                        Text(
+                            text = eyebrowTag.uppercase(),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhYellow
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = IxhInk
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = IxhInk.copy(alpha = 0.86f)
+                )
+            }
+            if (trailingContent != null) {
+                Spacer(modifier = Modifier.width(10.dp))
+                trailingContent()
+            }
+        }
+    }
+}
+
+/**
+ * Sculpted Section Title with Charcoal-Bordered Yellow Organic Pill Marker
+ */
+@Composable
+fun IxhSculptedSectionHeader(
+    title: String,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .width(8.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(topStart = 6.dp, bottomEnd = 6.dp))
+                    .background(IxhYellow)
+                    .border(1.6.dp, IxhInk, RoundedCornerShape(topStart = 6.dp, bottomEnd = 6.dp))
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk
+            )
+        }
+        if (actionLabel != null && onActionClick != null) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(IxhWhite)
+                    .border(1.6.dp, IxhInk, RoundedCornerShape(10.dp))
+                    .clickable(onClick = onActionClick)
+                    .padding(horizontal = 9.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = actionLabel,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = IxhInk
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun IxhSubScreenTopBar(
@@ -1571,6 +1913,7 @@ fun IxhSubScreenTopBar(
     onBack: () -> Unit,
     rightContent: (@Composable RowScope.() -> Unit)? = null
 ) {
+    val backShape = RoundedCornerShape(topStart = 14.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1579,10 +1922,11 @@ fun IxhSubScreenTopBar(
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(IxhWhite, CircleShape)
-                .border(1.5.dp, IxhInk, CircleShape)
+                .size(38.dp)
+                .neubrutalShadow(enabled = true, cornerRadius = 12.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                .clip(backShape)
+                .background(IxhYellowLight, backShape)
+                .border(2.2.dp, IxhInk, backShape)
                 .clickable(onClick = onBack)
                 .testTag("subscreen_back_button"),
             contentAlignment = Alignment.Center
@@ -1591,14 +1935,14 @@ fun IxhSubScreenTopBar(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                 contentDescription = "Kembali",
                 tint = IxhInk,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(19.dp)
             )
         }
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = IxhInk,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -1631,112 +1975,74 @@ fun IxhBottomNavigationBar(
     onTabSelected: (MainNavTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val design = LocalIxhDesign.current
-    val isGlass = design.style == VisualThemeStyle.LIQUID_GLASS
-
-    if (isGlass) {
-        val glassBg = if (design.lowRamSolidMode) IxhWhite else IxhWhite.copy(alpha = 0.90f)
-        Box(
-            modifier = modifier
+    val dockShape = RoundedCornerShape(topStart = 24.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 26.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(IxhCream)
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Row(
+            modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(28.dp),
-                color = glassBg,
-                shadowElevation = if (design.lowRamSolidMode) 1.dp else 4.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, IxhGlassBorder, RoundedCornerShape(28.dp))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 6.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    MainNavTab.entries.forEach { tab ->
-                        val selected = tab == currentTab
-                        val pillShape = RoundedCornerShape(20.dp)
-                        Column(
-                            modifier = Modifier
-                                .clip(pillShape)
-                                .background(if (selected) com.example.ui.theme.IxhLightYellow else Color.Transparent)
-                                .then(
-                                    if (selected) Modifier.border(1.5.dp, IxhInk, pillShape)
-                                    else Modifier
-                                )
-                                .clickable { onTabSelected(tab) }
-                                .padding(horizontal = 12.dp, vertical = 5.dp)
-                                .testTag("nav_${tab.name.lowercase()}"),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            IxhDualToneSystemIcon(
-                                iconType = tab.systemIcon,
-                                size = 21.dp
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = tab.label,
-                                fontSize = 9.5.sp,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (selected) IxhInk else IxhTextSecondary
-                            )
-                        }
+                .neubrutalShadow(enabled = true, cornerRadius = 22.dp, offsetY = 4.dp, offsetX = 2.8.dp)
+                .clip(dockShape)
+                .background(IxhWhite, dockShape)
+                .drawBehind {
+                    val w = size.width
+                    val h = size.height
+                    val dockWave = androidx.compose.ui.graphics.Path().apply {
+                        moveTo(0f, h * 0.65f)
+                        cubicTo(w * 0.30f, h * 0.40f, w * 0.70f, h * 0.90f, w, h * 0.55f)
+                        lineTo(w, h)
+                        lineTo(0f, h)
+                        close()
                     }
+                    drawPath(dockWave, color = IxhYellowLight.copy(alpha = 0.45f))
                 }
-            }
-        }
-    } else {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(IxhCream)
-                .windowInsetsPadding(WindowInsets.navigationBars)
+                .border(2.4.dp, IxhInk, dockShape)
+                .padding(horizontal = 6.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.5.dp)
-                    .background(IxhBorder)
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MainNavTab.entries.forEach { tab ->
-                    val selected = tab == currentTab
-                    val pillShape = RoundedCornerShape(14.dp)
-                    Column(
-                        modifier = Modifier
-                            .clip(pillShape)
-                            .background(if (selected) com.example.ui.theme.IxhLightYellow else Color.Transparent)
-                            .then(
-                                if (selected) Modifier.border(1.5.dp, IxhInk, pillShape)
-                                else Modifier
-                            )
-                            .clickable { onTabSelected(tab) }
-                            .padding(horizontal = 12.dp, vertical = 5.dp)
-                            .testTag("nav_${tab.name.lowercase()}"),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IxhDualToneSystemIcon(
-                            iconType = tab.systemIcon,
-                            size = 21.dp
+            MainNavTab.entries.forEach { tab ->
+                val selected = tab == currentTab
+                val pillShape = RoundedCornerShape(topStart = 16.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 18.dp)
+                Column(
+                    modifier = Modifier
+                        .then(
+                            if (selected) {
+                                Modifier.neubrutalShadow(
+                                    enabled = true,
+                                    cornerRadius = 14.dp,
+                                    offsetY = 2.dp,
+                                    offsetX = 1.5.dp
+                                )
+                            } else Modifier
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = tab.label,
-                            fontSize = 9.5.sp,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selected) IxhInk else IxhTextSecondary
+                        .clip(pillShape)
+                        .background(if (selected) IxhYellow else Color.Transparent)
+                        .then(
+                            if (selected) Modifier.border(2.dp, IxhInk, pillShape)
+                            else Modifier
                         )
-                    }
+                        .clickable { onTabSelected(tab) }
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                        .testTag("nav_${tab.name.lowercase()}"),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IxhDualToneSystemIcon(
+                        iconType = tab.systemIcon,
+                        size = 22.dp
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = tab.label,
+                        fontSize = 10.sp,
+                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold,
+                        color = IxhInk
+                    )
                 }
             }
         }
