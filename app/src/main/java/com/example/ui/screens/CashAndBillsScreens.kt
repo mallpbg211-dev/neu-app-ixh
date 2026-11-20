@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.local.BillPaymentStatus
@@ -673,26 +674,30 @@ private fun CashTransactionRowCard(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = tx.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = IxhInk,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = tx.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = IxhInk
+                        text = tx.dateTimeLabel,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = IxhTextSecondary
                     )
                     if (tx.isFromBill) {
-                        IxhStatusChip(text = "Dari tagihan", tone = ChipTone.BLUE)
+                        IxhStatusChip(text = "Tagihan", tone = ChipTone.BLUE)
                     }
                 }
-                Text(
-                    text = tx.dateTimeLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = IxhTextSecondary
-                )
             }
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = (if (tx.isIncome) "+" else "-") + formatIdr(tx.amount),
                 style = MaterialTheme.typography.titleSmall,

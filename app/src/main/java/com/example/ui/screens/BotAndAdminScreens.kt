@@ -1142,7 +1142,8 @@ fun BotReconnectQrPairingScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        botState.pairingCode.forEachIndexed { idx, ch ->
+                        val cleanCode = botState.pairingCode.filter { it.isLetterOrDigit() }
+                        cleanCode.forEachIndexed { idx, ch ->
                             if (idx == 4) {
                                 Text(
                                     text = "-",
@@ -1154,7 +1155,7 @@ fun BotReconnectQrPairingScreen(
                             }
                             Box(
                                 modifier = Modifier
-                                    .size(width = 30.dp, height = 42.dp)
+                                    .size(width = 32.dp, height = 42.dp)
                                     .neubrutalShadow(enabled = true, cornerRadius = 8.dp, offsetY = 2.2.dp, offsetX = 1.6.dp)
                                     .clip(RoundedCornerShape(9.dp))
                                     .background(IxhWhite)
@@ -1803,30 +1804,26 @@ fun UserManagementListScreen(
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Text(
-                                    text = user.fullName,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = IxhInk,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f, fill = false)
-                                )
-                                IxhStatusChip(
-                                    text = if (user.subRoleTitle.isNotBlank()) user.subRoleTitle else user.role,
-                                    tone = if (user.role == UserRole.SISWA.name) ChipTone.NEUTRAL else ChipTone.OUTLINE_YELLOW
-                                )
-                            }
+                            Text(
+                                text = user.fullName,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "@${user.username} • ${user.phoneWa}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = IxhTextSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            IxhStatusChip(
+                                text = if (user.subRoleTitle.isNotBlank()) user.subRoleTitle else user.role,
+                                tone = if (user.role == UserRole.SISWA.name) ChipTone.NEUTRAL else ChipTone.OUTLINE_YELLOW
                             )
                         }
                         Spacer(modifier = Modifier.width(6.dp))

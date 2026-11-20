@@ -1033,14 +1033,14 @@ fun NotificationsCenterScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             IxhSecondaryButton(
-                text = "Tandai Semua Dibaca",
+                text = "Tandai Dibaca",
                 icon = Icons.Outlined.DoneAll,
                 onClick = onMarkAllRead,
                 modifier = Modifier.weight(1f),
                 testTag = "mark_all_notifications_read"
             )
             IxhSecondaryButton(
-                text = "Hapus yg Dibaca",
+                text = "Hapus Dibaca",
                 icon = Icons.Outlined.DeleteOutline,
                 onClick = onDeleteRead,
                 modifier = Modifier.weight(1f)

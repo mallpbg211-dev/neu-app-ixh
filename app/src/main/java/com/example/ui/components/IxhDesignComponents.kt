@@ -1435,19 +1435,25 @@ fun IxhTopBrandHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IxhBlobMascotSlot(
                 slotStyle = IxhBlobSlotStyle.APP_BADGE_3D,
-                size = 40.dp
+                size = 38.dp
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column {
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "IX-H HUB",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
+                        color = IxhInk,
+                        maxLines = 1
                     )
                     Spacer(modifier = Modifier.width(5.dp))
                     Box(
@@ -1467,17 +1473,19 @@ fun IxhTopBrandHeader(
                     }
                 }
                 Text(
-                    text = "Kelas IX-H • SMPN 1 Bojongsari",
+                    text = "Kelas IX-H • Spensari",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = IxhTextSecondary
+                    color = IxhTextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(7.dp)
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             val rolePillShape = RoundedCornerShape(topStart = 14.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 15.dp)
             Box(
