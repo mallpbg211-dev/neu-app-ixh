@@ -36,6 +36,7 @@ import com.example.data.local.UserRole
 import com.example.data.local.WaNumberStatus
 import com.example.ui.components.IxhBottomNavigationBar
 import com.example.ui.components.MainNavTab
+import com.example.ui.components.neubrutalShadow
 import com.example.ui.screens.AcademicCalendarScreen
 import com.example.ui.screens.ActivityLogDetailScreen
 import com.example.ui.screens.ActivityLogsScreen
@@ -917,12 +918,14 @@ fun IxHubRootApp(vm: IxHubViewModel) {
                     .align(Alignment.TopCenter)
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
+                val toastShape = RoundedCornerShape(topStart = 18.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 18.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
+                        .neubrutalShadow(cornerRadius = 14.dp, offsetX = 2.6.dp, offsetY = 3.5.dp)
+                        .clip(toastShape)
                         .background(IxhYellow)
-                        .border(2.dp, IxhInk, RoundedCornerShape(12.dp))
+                        .border(2.4.dp, IxhInk, toastShape)
                         .clickable { vm.dismissToast() }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {

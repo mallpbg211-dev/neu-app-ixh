@@ -62,12 +62,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,20 +87,32 @@ import com.example.ui.components.BlobMascotState
 import com.example.ui.components.ChipTone
 import com.example.ui.components.IxhAlertBanner
 import com.example.ui.components.IxhBlobMascot
+import com.example.ui.components.IxhBlobMascotSlot
+import com.example.ui.components.IxhBlobSlotStyle
 import com.example.ui.components.IxhCard
 import com.example.ui.components.IxhCircleIcon
 import com.example.ui.components.IxhEmptyStateCard
 import com.example.ui.components.IxhNeubrutalToggle
+import com.example.ui.components.IxhOrganicModuleBanner
+import com.example.ui.components.IxhOrganicStatTile
+import com.example.ui.components.IxhOrganicWaveDivider
 import com.example.ui.components.IxhPrimaryButton
+import com.example.ui.components.IxhSculptedFab
+import com.example.ui.components.IxhSculptedFilterChip
+import com.example.ui.components.IxhSculptedSectionHeader
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhSegmentedTabs
 import com.example.ui.components.IxhStatusChip
+import com.example.ui.components.IxhStyledTextField
 import com.example.ui.components.IxhSubScreenTopBar
+import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.MainNavTab
+import com.example.ui.components.ixhOrganicScreenBackdrop
+import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhAmberBg
 import com.example.ui.theme.IxhBlue
 import com.example.ui.theme.IxhBlueBg
-import com.example.ui.theme.IxhBorder
+import com.example.ui.theme.IxhBlueText
 import com.example.ui.theme.IxhCream
 import com.example.ui.theme.IxhGreen
 import com.example.ui.theme.IxhGreenBg
@@ -131,14 +148,15 @@ fun GlobalSearchScreen(
 ) {
     val categories = listOf("Semua", "Siswa", "Tugas", "Jadwal", "Kas", "Pengumuman", "Absensi")
     val isSiswa = activeUser.role == UserRole.SISWA.name
+    val searchBoxShape = RoundedCornerShape(topStart = 18.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Pencarian Global IX-H",
@@ -151,76 +169,82 @@ fun GlobalSearchScreen(
             }
         )
 
-        // Search Input Box with Clear Button
-        OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            placeholder = { Text("Cari siswa, jadwal, tugas, kas, pengumuman...") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = "Cari",
-                    tint = IxhInk
-                )
-            },
-            trailingIcon = {
-                if (query.isNotEmpty()) {
-                    Icon(
-                        imageVector = Icons.Outlined.Close,
-                        contentDescription = "Hapus Pencarian",
-                        tint = IxhInk,
-                        modifier = Modifier
-                            .clickable { onQueryChange("") }
-                            .testTag("global_search_clear")
-                    )
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("global_search_input"),
-            singleLine = true,
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite,
-                focusedBorderColor = IxhInk,
-                unfocusedBorderColor = IxhInk
-            )
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Pencarian Lintas Modul",
+            title = "Cari Data Kelas IX-H",
+            subtitle = "${results.size} hasil siap telusur dari database lokal Room.",
+            iconType = IxhSystemIconType.BERANDA
         )
 
-        // Category Filter Row
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .neubrutalShadow(enabled = true, cornerRadius = 15.dp, offsetY = 3.dp, offsetX = 2.2.dp)
+                .clip(searchBoxShape)
+                .background(IxhWhite, searchBoxShape)
+                .border(2.4.dp, IxhInk, searchBoxShape)
+        ) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                placeholder = {
+                    Text(
+                        "Cari siswa, jadwal, tugas, kas, pengumuman...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = IxhTextSecondary
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Search,
+                        contentDescription = "Cari",
+                        tint = IxhInk
+                    )
+                },
+                trailingIcon = {
+                    if (query.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "Hapus Pencarian",
+                            tint = IxhInk,
+                            modifier = Modifier
+                                .clickable { onQueryChange("") }
+                                .testTag("global_search_clear")
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("global_search_input"),
+                singleLine = true,
+                shape = searchBoxShape,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = IxhInk
+                )
+            )
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             categories.forEach { cat ->
                 val isSelected = selectedCategory.equals(cat, ignoreCase = true)
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(if (isSelected) IxhYellow else IxhWhite)
-                        .border(
-                            width = if (isSelected) 2.dp else 1.5.dp,
-                            color = if (isSelected) IxhInk else IxhBorder,
-                            shape = RoundedCornerShape(999.dp)
-                        )
-                        .clickable { onCategoryChange(cat) }
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                        .testTag("global_search_cat_$cat")
-                ) {
-                    Text(
-                        text = cat,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
-                    )
-                }
+                IxhSculptedFilterChip(
+                    label = cat,
+                    selected = isSelected,
+                    onClick = { onCategoryChange(cat) },
+                    modifier = Modifier.testTag("global_search_cat_$cat")
+                )
             }
         }
 
-        // RBAC & Offline Notice Banner
         IxhAlertBanner(
             title = if (isSiswa) "Filter Privasi Role Siswa Aktif" else "Pencarian Lintas Modul (Offline-Ready)",
             text = if (isSiswa) {
@@ -240,16 +264,17 @@ fun GlobalSearchScreen(
             )
         } else {
             results.forEach { item ->
-                val catTone = when (item.category) {
-                    "Tugas" -> ChipTone.RED
-                    "Jadwal" -> ChipTone.BLUE
-                    "Kas" -> ChipTone.GREEN
-                    "Pengumuman" -> ChipTone.YELLOW
-                    "Absensi" -> ChipTone.OUTLINE_YELLOW
-                    else -> ChipTone.NEUTRAL
+                val (catTone, stripe) = when (item.category) {
+                    "Tugas" -> ChipTone.RED to IxhRed
+                    "Jadwal" -> ChipTone.BLUE to IxhBlue
+                    "Kas" -> ChipTone.GREEN to IxhGreen
+                    "Pengumuman" -> ChipTone.YELLOW to IxhYellow
+                    "Absensi" -> ChipTone.OUTLINE_YELLOW to IxhYellow
+                    else -> ChipTone.NEUTRAL to IxhInk
                 }
                 IxhCard(
                     backgroundColor = IxhWhite,
+                    leftStripeColor = stripe,
                     onClick = { onSelectResult(item) }
                 ) {
                     Row(
@@ -276,7 +301,7 @@ fun GlobalSearchScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(36.dp))
     }
 }
 
@@ -301,10 +326,10 @@ fun BackupRestoreScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Backup & Restore Database",
@@ -317,7 +342,8 @@ fun BackupRestoreScreen(
         if (!isAdmin) {
             IxhCard(
                 backgroundColor = IxhWhite,
-                contentPadding = PaddingValues(20.dp)
+                hasHardShadow = true,
+                contentPadding = PaddingValues(22.dp)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -327,15 +353,16 @@ fun BackupRestoreScreen(
                         icon = Icons.Outlined.Lock,
                         bgColor = IxhRedBg,
                         iconTint = IxhRed,
-                        size = 48.dp
+                        size = 54.dp
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Khusus Admin Sistem",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Fitur pencadangan dan pemulihan database hanya dapat dijalankan oleh Admin.",
                         style = MaterialTheme.typography.bodySmall,
@@ -345,6 +372,20 @@ fun BackupRestoreScreen(
                 }
             }
         } else {
+            IxhOrganicModuleBanner(
+                eyebrowTag = "Proteksi SHA-256",
+                title = "Brankas Snapshot Data",
+                subtitle = "Cadangkan atau pulihkan database lokal dengan validasi integritas.",
+                iconType = IxhSystemIconType.KAS,
+                trailingContent = {
+                    IxhOrganicStatTile(
+                        label = "Entitas",
+                        value = "${backupState.lastBackupTotalRecords}",
+                        accentColor = IxhGreenBg
+                    )
+                }
+            )
+
             IxhAlertBanner(
                 title = "Proteksi Integritas SHA-256 & Versi Schema",
                 text = "Setiap paket backup memvalidasi checksum SHA-256 dan versi schema (v3) sebelum memulihkan tabel pengguna, kas, jadwal, tugas, pengumuman, dan pengaturan.",
@@ -360,24 +401,23 @@ fun BackupRestoreScreen(
                 )
             }
 
-            // Card 1: Create Local Snapshot Backup
             IxhCard(
                 backgroundColor = IxhYellowLight,
                 borderColor = IxhInk,
                 hasHardShadow = true,
-                contentPadding = PaddingValues(14.dp)
+                contentPadding = PaddingValues(15.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                         IxhCircleIcon(
                             icon = Icons.Outlined.Backup,
                             bgColor = IxhYellow,
                             hasBorder = true,
-                            size = 38.dp
+                            size = 40.dp
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
@@ -404,16 +444,16 @@ fun BackupRestoreScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(14.dp))
                         .background(IxhWhite)
-                        .border(1.5.dp, IxhInk, RoundedCornerShape(12.dp))
-                        .padding(10.dp),
+                        .border(2.dp, IxhInk, RoundedCornerShape(14.dp))
+                        .padding(11.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
                         text = "Waktu Backup Terakhir: ${backupState.lastBackupTime}",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
@@ -425,13 +465,13 @@ fun BackupRestoreScreen(
                         Text(
                             text = "SHA-256: ${backupState.lastBackupChecksum.take(24)}...",
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = IxhGreenText
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 IxhPrimaryButton(
                     text = "Buat Backup Sekarang",
                     icon = Icons.Outlined.Backup,
@@ -440,10 +480,12 @@ fun BackupRestoreScreen(
                 )
             }
 
-            // Card 2: Restore Database from JSON Snapshot
+            IxhOrganicWaveDivider()
+
             IxhCard(
                 backgroundColor = IxhWhite,
-                contentPadding = PaddingValues(14.dp)
+                hasHardShadow = true,
+                contentPadding = PaddingValues(15.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IxhCircleIcon(
@@ -451,7 +493,7 @@ fun BackupRestoreScreen(
                         bgColor = IxhBlueBg,
                         iconTint = IxhBlue,
                         hasBorder = true,
-                        size = 36.dp
+                        size = 38.dp
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
@@ -470,23 +512,17 @@ fun BackupRestoreScreen(
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                IxhStyledTextField(
                     value = jsonInput,
                     onValueChange = { jsonInput = it },
-                    label = { Text("Paket JSON Backup (Schema v3)") },
-                    placeholder = { Text("Tempelkan isi file backup JSON atau buat backup di atas terlebih dahulu...") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("backup_json_input"),
+                    label = "Paket JSON Backup (Schema v3)",
+                    placeholder = "Tempelkan isi file backup JSON atau buat backup di atas terlebih dahulu...",
+                    singleLine = false,
                     minLines = 5,
-                    maxLines = 8,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = IxhSurfaceMuted,
-                        unfocusedContainerColor = IxhSurfaceMuted
-                    )
+                    testTag = "backup_json_input"
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 IxhSecondaryButton(
                     text = "Verifikasi & Pulihkan Database",
                     icon = Icons.Outlined.Restore,
@@ -496,7 +532,7 @@ fun BackupRestoreScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(36.dp))
     }
 
     if (showConfirmRestoreDialog) {
@@ -561,15 +597,22 @@ fun AnnouncementsListScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(IxhCream)) {
+    Box(modifier = Modifier.fillMaxSize().ixhOrganicScreenBackdrop()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             IxhSubScreenTopBar(title = "Pengumuman Kelas", onBack = onBack)
+
+            IxhOrganicModuleBanner(
+                eyebrowTag = "Papan Informasi IX-H",
+                title = "Pengumuman Resmi",
+                subtitle = "${announcements.count { !it.isDraft }} pengumuman aktif • Maksimal 2 disematkan di Beranda.",
+                iconType = IxhSystemIconType.NOTIFIKASI
+            )
 
             val tabs = if (isSiswa) {
                 listOf("Semua", "Penting", "Kegiatan")
@@ -593,15 +636,16 @@ fun AnnouncementsListScreen(
                 )
             } else {
                 visibleList.forEach { item ->
-                    val tone = when (item.category) {
-                        "Penting" -> ChipTone.RED
-                        "Kegiatan" -> ChipTone.YELLOW
-                        else -> ChipTone.BLUE
+                    val (tone, stripe) = when (item.category) {
+                        "Penting" -> ChipTone.RED to IxhRed
+                        "Kegiatan" -> ChipTone.YELLOW to IxhYellow
+                        else -> ChipTone.BLUE to IxhBlue
                     }
                     IxhCard(
                         backgroundColor = if (item.isPinned) IxhYellowLight else IxhWhite,
-                        borderColor = if (item.isPinned) IxhInk else null,
+                        borderColor = IxhInk,
                         hasHardShadow = item.isPinned,
+                        leftStripeColor = stripe,
                         onClick = { onOpenDetail(item) }
                     ) {
                         Row(
@@ -621,10 +665,11 @@ fun AnnouncementsListScreen(
                             Text(
                                 text = item.timeLabel,
                                 style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
                                 color = IxhTextSecondary
                             )
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(7.dp))
                         Text(
                             text = item.title,
                             style = MaterialTheme.typography.titleMedium,
@@ -641,7 +686,8 @@ fun AnnouncementsListScreen(
                         Text(
                             text = "Oleh ${item.authorName} (${item.authorRole})",
                             style = MaterialTheme.typography.labelSmall,
-                            color = IxhTextSecondary
+                            fontWeight = FontWeight.Bold,
+                            color = IxhInk.copy(alpha = 0.72f)
                         )
                     }
                 }
@@ -651,25 +697,15 @@ fun AnnouncementsListScreen(
         }
 
         if (!isSiswa) {
-            Box(
+            IxhSculptedFab(
+                icon = Icons.Outlined.Add,
+                contentDescription = "Buat Pengumuman",
+                onClick = onNavigateCreate,
+                testTag = "announcement_fab_add",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 18.dp, bottom = 18.dp)
-                    .size(52.dp)
-                    .clip(CircleShape)
-                    .background(IxhYellow)
-                    .border(2.dp, IxhInk, CircleShape)
-                    .clickable(onClick = onNavigateCreate)
-                    .testTag("announcement_fab_add"),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Buat Pengumuman",
-                    tint = IxhInk,
-                    modifier = Modifier.size(26.dp)
-                )
-            }
+            )
         }
     }
 }
@@ -689,9 +725,10 @@ fun AnnouncementDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Detail Pengumuman", onBack = onBack)
 
@@ -703,9 +740,10 @@ fun AnnouncementDetailScreen(
             )
         } else {
             IxhCard(
-                backgroundColor = IxhYellowLight,
+                backgroundColor = IxhYellow,
                 borderColor = IxhInk,
-                hasHardShadow = true
+                hasHardShadow = true,
+                contentPadding = PaddingValues(16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -713,29 +751,30 @@ fun AnnouncementDetailScreen(
                 ) {
                     IxhStatusChip(text = announcement.category, tone = ChipTone.RED)
                     if (announcement.isPinned) {
-                        IxhStatusChip(text = "Disematkan di Beranda", tone = ChipTone.OUTLINE_YELLOW)
+                        IxhStatusChip(text = "Disematkan di Beranda", tone = ChipTone.NEUTRAL)
                     }
                 }
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = announcement.title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
                 Text(
                     text = "Oleh ${announcement.authorName} (${announcement.authorRole}) • ${announcement.timeLabel}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = IxhTextSecondary
+                    fontWeight = FontWeight.Bold,
+                    color = IxhInk.copy(alpha = 0.8f)
                 )
             }
 
-            IxhCard(backgroundColor = IxhWhite) {
+            IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
                 Text(
                     text = announcement.content,
                     style = MaterialTheme.typography.bodyMedium,
                     color = IxhInk,
-                    lineHeight = 20.sp
+                    lineHeight = 22.sp
                 )
             }
 
@@ -749,7 +788,7 @@ fun AnnouncementDetailScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                             IxhCircleIcon(
                                 icon = Icons.Outlined.PictureAsPdf,
                                 bgColor = IxhRedBg,
@@ -760,7 +799,7 @@ fun AnnouncementDetailScreen(
                                 Text(
                                     text = announcement.attachmentName,
                                     style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.ExtraBold,
                                     color = IxhInk
                                 )
                                 Text(
@@ -806,7 +845,7 @@ fun AnnouncementDetailScreen(
                         onDelete(announcement)
                     }
                 ) {
-                    Text("Ya, Hapus", color = IxhRed, fontWeight = FontWeight.Bold)
+                    Text("Ya, Hapus", color = IxhRed, fontWeight = FontWeight.ExtraBold)
                 }
             },
             dismissButton = {
@@ -834,35 +873,43 @@ fun AnnouncementFormScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Buat Pengumuman", onBack = onBack)
 
-        Text("KATEGORI PENGUMUMAN", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Terbitkan Info",
+            title = "Siaran Kelas IX-H",
+            subtitle = "Pengumuman aktif otomatis mengirim notifikasi ke seluruh anggota.",
+            iconType = IxhSystemIconType.NOTIFIKASI
+        )
+
+        IxhSculptedSectionHeader(title = "Kategori Pengumuman")
         IxhSegmentedTabs(
             tabs = cats,
             selectedIndex = catIdx,
             onTabSelected = { catIdx = it }
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Judul Pengumuman") },
-            modifier = Modifier.fillMaxWidth().testTag("announcement_title_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Judul Pengumuman",
+            placeholder = "Contoh: Kerja Bakti Jumat Bersih",
+            testTag = "announcement_title_input"
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = content,
             onValueChange = { content = it },
-            label = { Text("Isi Pengumuman") },
-            modifier = Modifier.fillMaxWidth().testTag("announcement_content_input"),
+            label = "Isi Pengumuman",
+            placeholder = "Tulis detail informasi lengkap untuk siswa...",
+            singleLine = false,
             minLines = 4,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            testTag = "announcement_content_input"
         )
 
         IxhCard(backgroundColor = IxhWhite) {
@@ -872,7 +919,7 @@ fun AnnouncementFormScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Sematkan di Beranda", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = IxhInk)
+                    Text("Sematkan di Beranda", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                     Text("Maksimal 2 pengumuman disematkan bersamaan", style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)
                 }
                 IxhNeubrutalToggle(checked = isPinned, onCheckedChange = { isPinned = it })
@@ -928,10 +975,10 @@ fun NotificationsCenterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Pusat Notifikasi",
@@ -945,36 +992,39 @@ fun NotificationsCenterScreen(
             }
         )
 
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Aliran Event IX-H",
+            title = if (unreadCount > 0) "$unreadCount Belum Dibaca" else "Semua Sudah Dibaca",
+            subtitle = "Pemberitahuan kas, jadwal, tugas, & bot bebas duplikasi.",
+            iconType = IxhSystemIconType.NOTIFIKASI,
+            trailingContent = {
+                IxhOrganicStatTile(
+                    label = "Total",
+                    value = "${notifications.size}",
+                    accentColor = if (unreadCount > 0) IxhRedBg else IxhGreenBg,
+                    valueColor = if (unreadCount > 0) IxhRed else IxhGreenText
+                )
+            }
+        )
+
         IxhSegmentedTabs(
             tabs = listOf("Semua (${notifications.size})", "Belum Dibaca ($unreadCount)"),
             selectedIndex = filterTab,
             onTabSelected = { filterTab = it }
         )
 
-        // Category Filter Pills
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             categories.forEach { cat ->
-                val sel = selectedCategory == cat
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(if (sel) IxhInk else IxhWhite)
-                        .border(1.5.dp, IxhInk, RoundedCornerShape(999.dp))
-                        .clickable { selectedCategory = cat }
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = cat,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (sel) IxhWhite else IxhInk
-                    )
-                }
+                IxhSculptedFilterChip(
+                    label = cat,
+                    selected = selectedCategory == cat,
+                    onClick = { selectedCategory = cat }
+                )
             }
         }
 
@@ -997,6 +1047,8 @@ fun NotificationsCenterScreen(
             )
         }
 
+        IxhOrganicWaveDivider()
+
         if (displayed.isEmpty()) {
             IxhEmptyStateCard(
                 title = "Belum ada notifikasi.",
@@ -1006,11 +1058,18 @@ fun NotificationsCenterScreen(
             )
         } else {
             displayed.forEach { item ->
+                val catStripe = when (item.category.lowercase()) {
+                    "kas" -> IxhGreen
+                    "tugas" -> IxhRed
+                    "jadwal" -> IxhBlue
+                    "pengumuman" -> IxhYellow
+                    else -> IxhInk
+                }
                 IxhCard(
                     backgroundColor = if (item.isUnread) IxhYellowLight else IxhWhite,
-                    borderColor = if (item.isUnread) IxhInk else IxhBorder,
+                    borderColor = IxhInk,
                     hasHardShadow = item.isUnread,
-                    leftStripeColor = if (item.isUnread) IxhYellow else IxhBorder,
+                    leftStripeColor = if (item.isUnread) IxhYellow else catStripe,
                     onClick = { onNotificationClick(item) }
                 ) {
                     Row(
@@ -1027,19 +1086,27 @@ fun NotificationsCenterScreen(
                                 tone = if (item.isUnread) ChipTone.OUTLINE_YELLOW else ChipTone.NEUTRAL
                             )
                             IxhStatusChip(
-                                text = if (item.isUnread) "BARU • BELUM DIBACA" else "SUDAH DIBACA",
-                                tone = if (item.isUnread) ChipTone.YELLOW else ChipTone.NEUTRAL
+                                text = if (item.isUnread) "BARU" else "DIBACA",
+                                tone = if (item.isUnread) ChipTone.RED else ChipTone.GREEN
                             )
                         }
-                        Text(
-                            text = "Hapus",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = IxhRed,
-                            modifier = Modifier.clickable { onDeleteSingle(item.id) }
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(IxhRedBg)
+                                .border(1.4.dp, IxhInk, RoundedCornerShape(8.dp))
+                                .clickable { onDeleteSingle(item.id) }
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "Hapus",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhRed
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(7.dp))
                     Text(
                         text = item.title,
                         style = MaterialTheme.typography.titleSmall,
@@ -1051,11 +1118,12 @@ fun NotificationsCenterScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = IxhTextSecondary
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
                     Text(
                         text = "${item.dayGroup} • ${item.timeLabel}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = IxhTextSecondary
+                        fontWeight = FontWeight.Bold,
+                        color = IxhInk.copy(alpha = 0.72f)
                     )
                 }
             }
@@ -1076,13 +1144,21 @@ fun NotificationSettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Pengaturan Notifikasi", onBack = onBack)
 
-        IxhCard(backgroundColor = IxhWhite) {
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Preferensi Pengingat",
+            title = "Atur Saluran Notifikasi",
+            subtitle = "Pilih kategori peringatan yang aktif di perangkat ini.",
+            iconType = IxhSystemIconType.NOTIFIKASI
+        )
+
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
             NotifToggleRow("Pengingat Tugas (H-1)", "Ingatkan sehari sebelum tenggat waktu", tugasOn) { tugasOn = it }
             NotifToggleRow("Jadwal Pelajaran (20.00 WIB)", "Pengingat buku & perlengkapan esok hari", jadwalOn) { jadwalOn = it }
             NotifToggleRow("Tagihan & Konfirmasi Kas", "Notifikasi saat tagihan terbit atau lunas", kasOn) { kasOn = it }
@@ -1109,14 +1185,15 @@ private fun NotifToggleRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = IxhInk)
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)
         }
+        Spacer(modifier = Modifier.width(8.dp))
         IxhNeubrutalToggle(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
@@ -1136,74 +1213,166 @@ fun ProfileMainScreen(
     val isAdmin = activeUser.role == UserRole.ADMIN.name
     val isPengurus = activeUser.role == UserRole.PENGURUS.name
     var showLogoutDialog by remember { mutableStateOf(false) }
+    val idPassShape = RoundedCornerShape(topStart = 28.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 34.dp)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Profil & Akun", onBack = onBack)
 
-        // Hero Profile Card
-        IxhCard(
-            backgroundColor = IxhYellow,
-            hasHardShadow = true,
-            contentPadding = PaddingValues(16.dp)
+        // Signature Organic Student/Officer ID Pass
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .neubrutalShadow(enabled = true, cornerRadius = 24.dp, offsetY = 5.dp, offsetX = 3.5.dp)
+                .clip(idPassShape)
+                .background(IxhYellow, idPassShape)
+                .drawBehind {
+                    val w = size.width
+                    val h = size.height
+                    val upperWave = Path().apply {
+                        moveTo(w * 0.40f, 0f)
+                        cubicTo(w * 0.58f, h * 0.24f, w * 0.78f, h * 0.16f, w, h * 0.48f)
+                        lineTo(w, 0f)
+                        close()
+                    }
+                    drawPath(upperWave, color = Color(0xFFFFE47A).copy(alpha = 0.85f))
+
+                    val lowerWave = Path().apply {
+                        moveTo(0f, h * 0.70f)
+                        cubicTo(w * 0.34f, h * 0.56f, w * 0.68f, h * 0.88f, w, h * 0.62f)
+                        lineTo(w, h)
+                        lineTo(0f, h)
+                        close()
+                    }
+                    drawPath(lowerWave, color = Color(0xFFFFB703).copy(alpha = 0.28f))
+                    val contour = Path().apply {
+                        moveTo(0f, h * 0.70f)
+                        cubicTo(w * 0.34f, h * 0.56f, w * 0.68f, h * 0.88f, w, h * 0.62f)
+                    }
+                    drawPath(contour, color = IxhInk.copy(alpha = 0.20f), style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round))
+                }
+                .border(2.6.dp, IxhInk, idPassShape)
+                .padding(16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(IxhWhite)
-                        .border(2.dp, IxhInk, CircleShape),
-                    contentAlignment = Alignment.Center
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = activeUser.fullName.take(2).uppercase(),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .neubrutalShadow(enabled = true, cornerRadius = 18.dp, offsetY = 3.dp, offsetX = 2.2.dp)
+                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp))
+                                .background(IxhCream)
+                                .border(2.4.dp, IxhInk, RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = activeUser.fullName.take(2).uppercase(),
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(IxhInk)
+                                    .padding(horizontal = 9.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = if (activeUser.subRoleTitle.isNotBlank()) "${activeUser.role} • ${activeUser.subRoleTitle}".uppercase() else activeUser.role.uppercase(),
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = IxhYellow
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                text = activeUser.fullName,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = "@${activeUser.username} • Absen ${"%02d".format(activeUser.absenNo)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = IxhInk.copy(alpha = 0.85f)
+                            )
+                        }
+                    }
+                    IxhBlobMascotSlot(
+                        slotStyle = IxhBlobSlotStyle.APP_BADGE_3D,
+                        size = 44.dp
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
+
+                // Embedded quick metadata + action dock
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(IxhWhite)
+                        .border(2.dp, IxhInk, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("NOMOR WHATSAPP", fontSize = 8.5.sp, fontWeight = FontWeight.ExtraBold, color = IxhTextSecondary)
+                        Text(
+                            text = activeUser.phoneWa.ifBlank { "Belum diatur" },
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhInk
+                        )
+                    }
                     IxhStatusChip(
-                        text = if (activeUser.subRoleTitle.isNotBlank()) "${activeUser.role} • ${activeUser.subRoleTitle}" else activeUser.role,
-                        tone = ChipTone.NEUTRAL
+                        text = activeUser.waStatus.ifBlank { "VALID" },
+                        tone = ChipTone.GREEN
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = activeUser.fullName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IxhSecondaryButton(
+                        text = "Edit Profil & WA",
+                        icon = Icons.Outlined.Edit,
+                        onClick = { onNavigate(AppScreenRoute.PROFILE_EDIT) },
+                        modifier = Modifier.weight(1f)
                     )
-                    Text(
-                        text = "@${activeUser.username} • ${activeUser.phoneWa.ifBlank { "Belum diatur" }}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = IxhInk
+                    IxhSecondaryButton(
+                        text = "Ganti Tema",
+                        icon = Icons.Outlined.Palette,
+                        onClick = { onNavigate(AppScreenRoute.SETTINGS_APPEARANCE) },
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            IxhSecondaryButton(
-                text = "Edit Profil & Nomor WhatsApp",
-                icon = Icons.Outlined.Edit,
-                onClick = { onNavigate(AppScreenRoute.PROFILE_EDIT) }
-            )
         }
 
-        // Quick Global Search entry in Profile too
+        IxhOrganicWaveDivider()
+
+        IxhSculptedSectionHeader(title = "Pencarian Cepat")
         ProfileMenuRow("Pencarian Global IX-H", "Cari siswa, jadwal, tugas, kas & pengumuman", Icons.Outlined.Search) {
             onNavigate(AppScreenRoute.GLOBAL_SEARCH)
         }
 
-        // Role-specific Management Menu
         if (isAdmin || isPengurus) {
-            Text("MANAJEMEN KELAS & BOT", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
+            IxhSculptedSectionHeader(title = "Manajemen Kelas & Bot")
             ProfileMenuRow("Panel Bot WhatsApp (WangLinMD)", "Status sesi, kirim laporan & template", Icons.Outlined.SmartToy) {
                 onNavigate(AppScreenRoute.BOT_PANEL)
             }
@@ -1227,7 +1396,7 @@ fun ProfileMainScreen(
             }
         }
 
-        Text("PENGATURAN & BANTUAN", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
+        IxhSculptedSectionHeader(title = "Pengaturan & Bantuan")
         ProfileMenuRow("Ganti Tema & Tampilan", "Hybrid Neubrutalism • Liquid Glass (Enteng)", Icons.Outlined.Palette) {
             onNavigate(AppScreenRoute.SETTINGS_APPEARANCE)
         }
@@ -1265,7 +1434,7 @@ fun ProfileMainScreen(
                         onNavigate(AppScreenRoute.LOGOUT_SUCCESS)
                     }
                 ) {
-                    Text("Ya, Keluar", color = IxhRed, fontWeight = FontWeight.Bold)
+                    Text("Ya, Keluar", color = IxhRed, fontWeight = FontWeight.ExtraBold)
                 }
             },
             dismissButton = {
@@ -1287,23 +1456,34 @@ private fun ProfileMenuRow(
     IxhCard(
         backgroundColor = IxhWhite,
         onClick = onClick,
-        contentPadding = PaddingValues(11.dp)
+        contentPadding = PaddingValues(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IxhCircleIcon(icon = icon, bgColor = IxhYellowLight, size = 36.dp)
-            Spacer(modifier = Modifier.width(10.dp))
+            IxhCircleIcon(icon = icon, bgColor = IxhYellowLight, size = 38.dp)
+            Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = IxhInk)
+                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = IxhTextSecondary
-            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(9.dp))
+                    .background(IxhCream)
+                    .border(1.6.dp, IxhInk, RoundedCornerShape(9.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = IxhInk,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
@@ -1320,28 +1500,32 @@ fun ProfileEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Edit Profil Saya", onBack = onBack)
 
-        OutlinedTextField(
-            value = fullName,
-            onValueChange = { fullName = it },
-            label = { Text("Nama Lengkap") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Identitas Anggota",
+            title = "@${activeUser.username}",
+            subtitle = "Perbarui nama tampilan & nomor WhatsApp penerima laporan.",
+            iconType = IxhSystemIconType.PROFIL
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
+            value = fullName,
+            onValueChange = { fullName = it },
+            label = "Nama Lengkap",
+            placeholder = "Nama sesuai absen kelas"
+        )
+
+        IxhStyledTextField(
             value = phoneWa,
             onValueChange = { phoneWa = it },
-            label = { Text("Nomor WhatsApp Aktif") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Nomor WhatsApp Aktif",
+            placeholder = "0812xxxxxxxx"
         )
 
         IxhAlertBanner(
@@ -1371,23 +1555,29 @@ fun SettingsAppearanceScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Ganti Tema & Tampilan", onBack = onBack)
 
-        Text(
-            text = "PILIH GAYA DESAIN",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Personalisasi UI",
+            title = "Gaya Visual IX-H Hub",
+            subtitle = "Pilih gaya tampilan utama dan mode hemat memori.",
+            iconType = IxhSystemIconType.BERANDA
         )
 
+        IxhSculptedSectionHeader(title = "Pilih Gaya Desain")
+
         // Option 1: Hybrid Premium Neubrutalism (Bawaan)
+        val isNeu = selectedStyle == VisualThemeStyle.NEUBRUTALISM
         IxhCard(
-            backgroundColor = if (selectedStyle == VisualThemeStyle.NEUBRUTALISM) IxhYellowLight else IxhWhite,
+            backgroundColor = if (isNeu) IxhYellowLight else IxhWhite,
             borderColor = IxhInk,
-            hasHardShadow = selectedStyle == VisualThemeStyle.NEUBRUTALISM,
+            hasHardShadow = isNeu,
+            leftStripeColor = if (isNeu) IxhYellow else IxhSurfaceMuted,
             onClick = { selectedStyle = VisualThemeStyle.NEUBRUTALISM }
         ) {
             Row(
@@ -1398,30 +1588,41 @@ fun SettingsAppearanceScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
-                            text = "Hybrid Neubrutalism (Bawaan)",
+                            text = "Hybrid Neubrutalism",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.ExtraBold,
                             color = IxhInk
                         )
                         IxhStatusChip(text = "Sangat Ringan", tone = ChipTone.GREEN)
                     }
+                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "Garis tepi tegas 2px, warna kuning hangat #FFC928, kontras tinggi & ramah semua HP.",
+                        text = "Garis tepi tegas hitam, bayangan taktil, dan warna kuning hangat #FFC928.",
                         style = MaterialTheme.typography.bodySmall,
                         color = IxhTextSecondary
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(modifier = Modifier.size(18.dp).clip(CircleShape).background(IxhYellow).border(1.8.dp, IxhInk, CircleShape))
+                        Box(modifier = Modifier.size(18.dp).clip(CircleShape).background(IxhCream).border(1.8.dp, IxhInk, CircleShape))
+                        Box(modifier = Modifier.size(18.dp).clip(CircleShape).background(IxhInk).border(1.8.dp, IxhInk, CircleShape))
+                    }
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 IxhStatusChip(
-                    text = if (selectedStyle == VisualThemeStyle.NEUBRUTALISM) "Aktif ✓" else "Pilih",
-                    tone = if (selectedStyle == VisualThemeStyle.NEUBRUTALISM) ChipTone.OUTLINE_YELLOW else ChipTone.NEUTRAL
+                    text = if (isNeu) "Aktif ✓" else "Pilih",
+                    tone = if (isNeu) ChipTone.OUTLINE_YELLOW else ChipTone.NEUTRAL
                 )
             }
         }
 
         // Option 2: Liquid Glass (Enteng)
+        val isGlass = selectedStyle == VisualThemeStyle.LIQUID_GLASS
         IxhCard(
-            backgroundColor = if (selectedStyle == VisualThemeStyle.LIQUID_GLASS) IxhBlueBg else IxhWhite,
-            borderColor = if (selectedStyle == VisualThemeStyle.LIQUID_GLASS) IxhBlue else IxhBorder,
+            backgroundColor = if (isGlass) IxhBlueBg else IxhWhite,
+            borderColor = IxhInk,
+            hasHardShadow = isGlass,
+            leftStripeColor = if (isGlass) IxhBlue else IxhSurfaceMuted,
             onClick = { selectedStyle = VisualThemeStyle.LIQUID_GLASS }
         ) {
             Row(
@@ -1439,21 +1640,28 @@ fun SettingsAppearanceScreen(
                         )
                         IxhStatusChip(text = "Modern", tone = ChipTone.BLUE)
                     }
+                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "Kartu kaca semi-transparan, sudut membulat 18dp, dan bilah navigasi melayang.",
+                        text = "Kartu kaca semi-transparan, sudut membulat lembut, dan bilah navigasi melayang.",
                         style = MaterialTheme.typography.bodySmall,
                         color = IxhTextSecondary
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(modifier = Modifier.size(18.dp).clip(CircleShape).background(IxhBlueBg).border(1.8.dp, IxhInk, CircleShape))
+                        Box(modifier = Modifier.size(18.dp).clip(CircleShape).background(IxhWhite).border(1.8.dp, IxhInk, CircleShape))
+                        Box(modifier = Modifier.size(18.dp).clip(CircleShape).background(IxhYellow).border(1.8.dp, IxhInk, CircleShape))
+                    }
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 IxhStatusChip(
-                    text = if (selectedStyle == VisualThemeStyle.LIQUID_GLASS) "Aktif ✓" else "Pilih",
-                    tone = if (selectedStyle == VisualThemeStyle.LIQUID_GLASS) ChipTone.BLUE else ChipTone.NEUTRAL
+                    text = if (isGlass) "Aktif ✓" else "Pilih",
+                    tone = if (isGlass) ChipTone.BLUE else ChipTone.NEUTRAL
                 )
             }
         }
 
-        // Low-RAM Solid Mode
-        IxhCard(backgroundColor = IxhWhite) {
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1463,7 +1671,7 @@ fun SettingsAppearanceScreen(
                     Text(
                         text = "Mode Hemat RAM (HP RAM ≤ 2 GB)",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
@@ -1472,6 +1680,7 @@ fun SettingsAppearanceScreen(
                         color = IxhTextSecondary
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 IxhNeubrutalToggle(checked = isLowRam, onCheckedChange = { isLowRam = it })
             }
         }
@@ -1499,35 +1708,37 @@ fun SettingsSecurityScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Keamanan & Password", onBack = onBack)
 
-        OutlinedTextField(
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Keamanan Akun",
+            title = "Ubah Password Akun",
+            subtitle = "Gunakan kombinasi huruf & angka minimal 8 karakter.",
+            iconType = IxhSystemIconType.PROFIL
+        )
+
+        IxhStyledTextField(
             value = oldPass,
             onValueChange = { oldPass = it },
-            label = { Text("Password Saat Ini") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Password Saat Ini",
+            placeholder = "Masukkan password aktif"
         )
-        OutlinedTextField(
+        IxhStyledTextField(
             value = newPass,
             onValueChange = { newPass = it },
-            label = { Text("Password Baru (Min. 8 karakter)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Password Baru (Min. 8 karakter)",
+            placeholder = "Minimal 8 karakter huruf & angka"
         )
-        OutlinedTextField(
+        IxhStyledTextField(
             value = confirmPass,
             onValueChange = { confirmPass = it },
-            label = { Text("Ulangi Password Baru") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Ulangi Password Baru",
+            placeholder = "Ketik ulang password baru"
         )
 
         IxhPrimaryButton(
@@ -1561,9 +1772,10 @@ fun SettingsVpsSyncScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Offline-First & Sinkronisasi VPS",
@@ -1576,33 +1788,56 @@ fun SettingsVpsSyncScreen(
             }
         )
 
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Sinkronisasi VPS",
+            title = "Antrean Data Lokal",
+            subtitle = "Semua perubahan tersimpan di Room & siap sinkronisasi idempoten.",
+            iconType = IxhSystemIconType.BOT
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IxhOrganicStatTile(
+                label = "Pending",
+                value = "$pendingCount",
+                accentColor = IxhYellowLight,
+                modifier = Modifier.weight(1f)
+            )
+            IxhOrganicStatTile(
+                label = "Tersinkron",
+                value = "$syncedCount",
+                accentColor = IxhGreenBg,
+                valueColor = IxhGreenText,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
         IxhAlertBanner(
             title = "Arsitektur Offline-First (Room SQLite + Idempotent Queue)",
             text = "Semua perubahan absensi, kas, jadwal, tugas, dan pengumuman langsung tersimpan di Room dan dicatat dalam antrean sinkronisasi lokal dengan idempotency key unik.",
             tone = ChipTone.GREEN
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = baseUrl,
             onValueChange = { baseUrl = it },
-            label = { Text("Endpoint URL Server VPS") },
-            placeholder = { Text("Contoh: https://api.ixh-spensari.my.id/v1") },
-            modifier = Modifier.fillMaxWidth().testTag("vps_url_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Endpoint URL Server VPS",
+            placeholder = "Contoh: https://api.ixh-spensari.my.id/v1",
+            testTag = "vps_url_input"
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = apiKey,
             onValueChange = { apiKey = it },
-            label = { Text("Bearer Token / API Key VPS") },
-            modifier = Modifier.fillMaxWidth().testTag("vps_token_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Bearer Token / API Key VPS",
+            placeholder = "Masukkan bearer token VPS",
+            testTag = "vps_token_input"
         )
 
         IxhCard(backgroundColor = IxhWhite) {
-            Text("STATUS SINKRONISASI TERAKHIR", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
+            Text("STATUS SINKRONISASI TERAKHIR", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = botState.lastVpsSyncStatus,
@@ -1610,7 +1845,7 @@ fun SettingsVpsSyncScreen(
                 fontWeight = FontWeight.Bold,
                 color = IxhInk
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 IxhStatusChip(text = "Pending: $pendingCount", tone = ChipTone.YELLOW)
                 IxhStatusChip(text = "Tersinkron: $syncedCount", tone = ChipTone.GREEN)
@@ -1636,15 +1871,14 @@ fun SettingsVpsSyncScreen(
             }
         }
 
-        // Conflict Resolution Policy Summary Card
-        IxhCard(backgroundColor = IxhYellowLight, borderColor = IxhInk) {
+        IxhCard(backgroundColor = IxhYellowLight, borderColor = IxhInk, hasHardShadow = true) {
             Text(
                 text = "KEBIJAKAN RESOLUSI KONFLIK DATA (§22.5)",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = IxhInk
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "• Kas & Transaksi: APPEND_LEDGER (Buku besar append-only, tidak pernah ditimpa diam-diam)\n" +
                     "• Absensi & Pengguna: SERVER_AUTHORITATIVE_MERGE (Rekonsiliasi aman dengan jejak audit)\n" +
@@ -1654,11 +1888,7 @@ fun SettingsVpsSyncScreen(
             )
         }
 
-        Text(
-            text = "ANTREAN SINKRONISASI LOKAL (${syncQueue.size})",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "Antrean Sinkronisasi Lokal (${syncQueue.size})")
 
         if (syncQueue.isEmpty()) {
             IxhEmptyStateCard(
@@ -1668,12 +1898,12 @@ fun SettingsVpsSyncScreen(
             )
         } else {
             syncQueue.take(15).forEach { item ->
-                val tone = when (item.status) {
-                    "SYNCED" -> ChipTone.GREEN
-                    "FAILED" -> ChipTone.RED
-                    else -> ChipTone.YELLOW
+                val (tone, stripe) = when (item.status) {
+                    "SYNCED" -> ChipTone.GREEN to IxhGreen
+                    "FAILED" -> ChipTone.RED to IxhRed
+                    else -> ChipTone.YELLOW to IxhYellow
                 }
-                IxhCard(backgroundColor = IxhWhite) {
+                IxhCard(backgroundColor = IxhWhite, leftStripeColor = stripe) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1686,14 +1916,15 @@ fun SettingsVpsSyncScreen(
                         Text(
                             text = item.actorName.ifBlank { "Lokal" },
                             style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
                             color = IxhTextSecondary
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
                     Text(
                         text = item.summary,
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
@@ -1714,30 +1945,53 @@ fun LogoutSuccessScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        IxhBlobMascot(expression = BlobExpression.SMILE_HAPPY, size = 90.dp)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Berhasil Keluar",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.ExtraBold,
-            color = IxhInk
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = "Sampai jumpa kembali di IX-H Hub • SMP Spensari!",
-            style = MaterialTheme.typography.bodyMedium,
-            color = IxhTextSecondary,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        IxhPrimaryButton(
-            text = "Masuk Kembali ke Akun",
-            onClick = onLoginAgain
-        )
+        IxhCard(
+            backgroundColor = IxhYellowLight,
+            borderColor = IxhInk,
+            hasHardShadow = true,
+            contentPadding = PaddingValues(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(106.dp)
+                        .neubrutalShadow(enabled = true, cornerRadius = 24.dp, offsetY = 3.5.dp, offsetX = 2.5.dp)
+                        .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 30.dp))
+                        .background(IxhWhite)
+                        .border(2.5.dp, IxhInk, RoundedCornerShape(topStart = 28.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 30.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IxhBlobMascot(expression = BlobExpression.SMILE_HAPPY, size = 86.dp)
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Berhasil Keluar",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = IxhInk
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Sampai jumpa kembali di IX-H Hub • SMP Spensari!",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = IxhTextSecondary,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                IxhPrimaryButton(
+                    text = "Masuk Kembali ke Akun",
+                    onClick = onLoginAgain
+                )
+            }
+        }
     }
 }
 
@@ -1841,29 +2095,34 @@ fun HelpCenterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Pusat Bantuan", onBack = onBack)
 
-        OutlinedTextField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = { Text("Ketik min. 2 huruf (contoh: tagihan, stop, kas)...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("help_search_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Panduan Cepat IX-H",
+            title = "Pusat Bantuan (FAQ)",
+            subtitle = "Ketik kata kunci minimal 2 huruf untuk menyorot topik.",
+            iconType = IxhSystemIconType.BERANDA
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        IxhStyledTextField(
+            value = query,
+            onValueChange = { query = it },
+            placeholder = "Ketik min. 2 huruf (contoh: tagihan, stop, kas)...",
+            leadingIcon = Icons.Outlined.Search,
+            testTag = "help_search_input"
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("tagihan", "STOP", "absensi", "QR").forEach { kw ->
-                IxhStatusChip(
-                    text = kw,
-                    tone = if (query.equals(kw, ignoreCase = true)) ChipTone.OUTLINE_YELLOW else ChipTone.NEUTRAL,
-                    modifier = Modifier.clickable { query = kw }
+                IxhSculptedFilterChip(
+                    label = kw,
+                    selected = query.equals(kw, ignoreCase = true),
+                    onClick = { query = kw }
                 )
             }
         }
@@ -1871,6 +2130,7 @@ fun HelpCenterScreen(
         if (results.isEmpty()) {
             IxhCard(
                 backgroundColor = IxhWhite,
+                hasHardShadow = true,
                 contentPadding = PaddingValues(20.dp)
             ) {
                 Column(
@@ -1882,7 +2142,7 @@ fun HelpCenterScreen(
                     Text(
                         text = "Topik \"$trimmed\" tidak ditemukan",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -1903,6 +2163,7 @@ fun HelpCenterScreen(
             results.forEach { topic ->
                 IxhCard(
                     backgroundColor = IxhWhite,
+                    leftStripeColor = if (topic.forAdminOnly) IxhInk else IxhYellow,
                     onClick = { onOpenArticle(topic.id) }
                 ) {
                     Row(
@@ -1914,7 +2175,7 @@ fun HelpCenterScreen(
                             IxhStatusChip(text = "Khusus Admin", tone = ChipTone.NEUTRAL)
                         }
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(7.dp))
                     HighlightedText(
                         fullText = topic.title,
                         highlight = if (isLiveSearch) trimmed else ""
@@ -1977,7 +2238,7 @@ private fun HighlightedText(fullText: String, highlight: String) {
         Text(
             text = fullText,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = IxhInk
         )
         return
@@ -2004,7 +2265,7 @@ private fun HighlightedText(fullText: String, highlight: String) {
     Text(
         text = annotated,
         style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.ExtraBold,
         color = IxhInk
     )
 }
@@ -2020,47 +2281,57 @@ fun HelpArticleDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Artikel Panduan", onBack = onBack)
 
         IxhCard(
-            backgroundColor = IxhYellowLight,
-            borderColor = IxhInk
+            backgroundColor = IxhYellow,
+            borderColor = IxhInk,
+            hasHardShadow = true
         ) {
-            IxhStatusChip(text = topic.category, tone = ChipTone.OUTLINE_YELLOW)
-            Spacer(modifier = Modifier.height(6.dp))
+            IxhStatusChip(text = topic.category, tone = ChipTone.NEUTRAL)
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = topic.title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.ExtraBold,
                 color = IxhInk
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = topic.summary,
                 style = MaterialTheme.typography.bodySmall,
-                color = IxhTextSecondary
+                fontWeight = FontWeight.SemiBold,
+                color = IxhInk.copy(alpha = 0.85f)
             )
         }
 
-        IxhCard(backgroundColor = IxhWhite) {
-            Text("LANGKAH DEMI LANGKAH", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
-            Spacer(modifier = Modifier.height(8.dp))
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
+            Text(
+                text = "LANGKAH DEMI LANGKAH",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk
+            )
+            Spacer(modifier = Modifier.height(10.dp))
             topic.steps.forEachIndexed { idx, stepText ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 5.dp),
                     verticalAlignment = Alignment.Top
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(22.dp)
-                            .clip(CircleShape)
+                            .size(26.dp)
+                            .neubrutalShadow(enabled = true, cornerRadius = 8.dp, offsetY = 1.8.dp, offsetX = 1.4.dp)
+                            .clip(RoundedCornerShape(8.dp))
                             .background(IxhYellow)
-                            .border(1.dp, IxhInk, CircleShape),
+                            .border(1.8.dp, IxhInk, RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -2085,10 +2356,10 @@ fun HelpArticleDetailScreen(
             Text(
                 text = "Apakah panduan ini membantu?",
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 color = IxhInk
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 IxhPrimaryButton(
                     text = "Ya, Membantu",
@@ -2204,7 +2475,7 @@ fun CoachmarkTourOverlay(
                     Text(
                         text = "Lewati Tur ✕",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhTextSecondary,
                         modifier = Modifier.clickable(onClick = onDismissTour)
                     )

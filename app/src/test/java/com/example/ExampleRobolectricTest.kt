@@ -22,25 +22,36 @@ import com.example.data.local.AnnouncementEntity
 import com.example.data.local.AssignmentEntity
 import com.example.data.local.AttendanceStatus
 import com.example.data.local.BillPaymentStatus
+import com.example.data.local.BotDispatchLogEntity
+import com.example.data.local.CashTransactionEntity
 import com.example.data.local.IxHubDatabase
+import com.example.data.local.NotificationEntity
 import com.example.data.local.PasswordSecurity
 import com.example.data.local.ScheduleEntity
 import com.example.data.local.UserEntity
 import com.example.data.local.UserRole
+import com.example.data.local.WaNumberStatus
 import com.example.data.repository.IxHubRepository
 import com.example.ui.screens.ActivityLogsScreen
 import com.example.ui.screens.AnnouncementsListScreen
 import com.example.ui.screens.AttendanceMainTabScreen
 import com.example.ui.screens.BackupRestoreScreen
 import com.example.ui.screens.BotPanelScreen
+import com.example.ui.screens.BotReconnectQrPairingScreen
+import com.example.ui.screens.BotSettingsAdminScreen
 import com.example.ui.screens.CashMainTabScreen
 import com.example.ui.screens.DashboardScreen
 import com.example.ui.screens.FirstRunAdminSetupScreen
 import com.example.ui.screens.GlobalSearchScreen
+import com.example.ui.screens.HelpCenterScreen
+import com.example.ui.screens.LockedAccountScreen
 import com.example.ui.screens.LoginScreen
 import com.example.ui.screens.NotificationsCenterScreen
+import com.example.ui.screens.ProfileMainScreen
 import com.example.ui.screens.ScheduleMainTabScreen
+import com.example.ui.screens.SettingsAppearanceScreen
 import com.example.ui.screens.TasksMainTabScreen
+import com.example.ui.screens.UserManagementListScreen
 import com.example.ui.theme.IxhBackgroundCream
 import com.example.ui.theme.IxhCharcoal
 import com.example.ui.theme.IxhError
@@ -54,6 +65,7 @@ import com.example.ui.theme.IxhSurfacePrimary
 import com.example.ui.theme.IxhSurfaceSecondary
 import com.example.ui.theme.IxhWarning
 import com.example.ui.theme.MyApplicationTheme
+import com.example.ui.theme.VisualThemeStyle
 import com.example.ui.viewmodel.BackupUiState
 import com.example.ui.viewmodel.BotConnectionState
 import kotlinx.coroutines.flow.first
@@ -731,6 +743,331 @@ class ExampleRobolectricTest {
         saveRootViewScreenshot(rootView, "final_14_audit_logs.png")
     }
 
+    @Test
+    fun captureAllRedesignedScreensScreenshots() {
+        val admin = UserEntity(
+            id = 1,
+            absenNo = 1,
+            fullName = "Ahmad Ramadhan",
+            username = "ahmad.admin",
+            role = UserRole.ADMIN.name,
+            subRoleTitle = "Ketua Kelas & Admin",
+            phoneWa = "+62 812-1001-2026",
+            waStatus = WaNumberStatus.VALID.name,
+            attendanceToday = AttendanceStatus.HADIR.name,
+            presentDaysCount = 18,
+            totalEffectiveDays = 20,
+            billStatus = BillPaymentStatus.LUNAS.name,
+            billAmount = 0,
+            lastLogin = "Hari ini • 07.15 WIB"
+        )
+        val users = listOf(
+            admin,
+            UserEntity(
+                id = 2,
+                absenNo = 2,
+                fullName = "Citra Lestari",
+                username = "citra.l",
+                role = UserRole.PENGURUS.name,
+                subRoleTitle = "Bendahara",
+                phoneWa = "+62 857-2341-0988",
+                waStatus = WaNumberStatus.VALID.name,
+                attendanceToday = AttendanceStatus.HADIR.name,
+                presentDaysCount = 19,
+                totalEffectiveDays = 20,
+                billStatus = BillPaymentStatus.LUNAS.name,
+                billAmount = 0
+            ),
+            UserEntity(
+                id = 3,
+                absenNo = 3,
+                fullName = "Rangga Putra",
+                username = "rangga.p",
+                role = UserRole.SISWA.name,
+                subRoleTitle = "Siswa IX-H",
+                phoneWa = "+62 813-9999-1111",
+                waStatus = WaNumberStatus.TIDAK_DI_WA.name,
+                attendanceToday = AttendanceStatus.IZIN.name,
+                presentDaysCount = 16,
+                totalEffectiveDays = 20,
+                billStatus = BillPaymentStatus.BELUM.name,
+                billAmount = 12000
+            )
+        )
+        val transactions = listOf(
+            CashTransactionEntity(
+                id = 1,
+                title = "Iuran Kas Mingguan IX-H",
+                amount = 180000,
+                isIncome = true,
+                isFromBill = true,
+                dateTimeLabel = "Hari ini • 08.00 WIB",
+                studentName = "Citra Lestari",
+                paymentMethod = "QRIS",
+                confirmedBy = "Citra Lestari",
+                proofNote = "Setoran 15 siswa via QRIS kelas"
+            ),
+            CashTransactionEntity(
+                id = 2,
+                title = "Cetak LKS & Spidol Kelas",
+                amount = 45000,
+                isIncome = false,
+                isFromBill = false,
+                dateTimeLabel = "Kemarin • 14.30 WIB",
+                paymentMethod = "Tunai",
+                confirmedBy = "Ahmad Ramadhan",
+                proofNote = "Nota fotokopi Pak Budi"
+            )
+        )
+        val assignments = listOf(
+            AssignmentEntity(
+                id = 1,
+                title = "Latihan Bab 4 — Bangun Ruang",
+                subject = "Matematika",
+                teacher = "Pak Hendra",
+                deadlineLabel = "Besok • 23:59",
+                daysRemaining = 1,
+                isCompleted = false,
+                description = "Kerjakan halaman 45 nomor 1-5 di buku tulis."
+            ),
+            AssignmentEntity(
+                id = 2,
+                title = "Laporan Praktikum Ekosistem",
+                subject = "IPA",
+                teacher = "Bu Sari",
+                deadlineLabel = "Jumat • 15:00",
+                daysRemaining = 3,
+                isCompleted = false,
+                description = "Sertakan tabel pengamatan dan dokumentasi."
+            )
+        )
+        val announcements = listOf(
+            AnnouncementEntity(
+                id = 1,
+                title = "Kerja Bakti & Evaluasi Kelas IX-H",
+                content = "Seluruh siswa membawa peralatan kebersihan hari Jumat pukul 07.00 WIB.",
+                authorName = "Ahmad Ramadhan",
+                authorRole = "ADMIN",
+                timeLabel = "10 menit lalu",
+                category = "Penting",
+                isPinned = true,
+                isDraft = false
+            ),
+            AnnouncementEntity(
+                id = 2,
+                title = "Jadwal Foto Buku Tahunan",
+                content = "Sesi pemotretan kelas IX-H dilaksanakan di lapangan utama setelah jam ke-4.",
+                authorName = "Citra Lestari",
+                authorRole = "PENGURUS",
+                timeLabel = "Kemarin",
+                category = "Kegiatan",
+                isPinned = false,
+                isDraft = false
+            )
+        )
+        val notifications = listOf(
+            NotificationEntity(
+                id = 1,
+                title = "Tagihan Kas Pekan 3 Menunggu",
+                subtitle = "3 siswa belum melunasi iuran kas Rp12.000.",
+                timeLabel = "5m lalu",
+                dayGroup = "HARI INI",
+                category = "Kas",
+                isUnread = true,
+                targetRoute = "kas",
+                eventKey = "k1"
+            ),
+            NotificationEntity(
+                id = 2,
+                title = "Deadline Tugas Matematika Besok",
+                subtitle = "Latihan Bab 4 — Bangun Ruang dikumpulkan ke Pak Hendra.",
+                timeLabel = "1j lalu",
+                dayGroup = "HARI INI",
+                category = "Tugas",
+                isUnread = true,
+                targetRoute = "tugas",
+                eventKey = "t1"
+            ),
+            NotificationEntity(
+                id = 3,
+                title = "Gateway WangLinMD Tersambung",
+                subtitle = "Bot WhatsApp kelas IX-H siap mengirim pengingat otomatis.",
+                timeLabel = "Kemarin",
+                dayGroup = "KEMARIN",
+                category = "Bot",
+                isUnread = false,
+                targetRoute = "bot",
+                eventKey = "b1"
+            )
+        )
+        val dispatchLogs = listOf(
+            BotDispatchLogEntity(
+                id = 1,
+                title = "Rekap Absensi Harian IX-H",
+                category = "Absensi",
+                dateTimeLabel = "Hari ini • 07.45 WIB",
+                sentCount = 29,
+                totalTarget = 30,
+                failedCount = 1,
+                statusLabel = "Sebagian gagal"
+            ),
+            BotDispatchLogEntity(
+                id = 2,
+                title = "Pengingat Kas Pekan 3",
+                category = "Kas",
+                dateTimeLabel = "Kemarin • 19.00 WIB",
+                sentCount = 30,
+                totalTarget = 30,
+                failedCount = 0,
+                statusLabel = "Terkirim"
+            )
+        )
+        val connectedBot = BotConnectionState(
+            isConnected = true,
+            botPhoneNumber = "+62 812-3456-7890",
+            sessionName = "wanglin-ixh",
+            activeSince = "2 jam 15 mnt",
+            pterodactylStatus = "Berjalan",
+            maxMessagesPerHour = 20,
+            randomDelayRange = "3-7 dtk",
+            pairingCode = "IXH8-4921"
+        )
+
+        var activeRoute by mutableStateOf("ATTENDANCE")
+        var rootView: View? = null
+
+        composeTestRule.setContent {
+            rootView = LocalView.current.rootView
+            MyApplicationTheme(visualStyle = VisualThemeStyle.NEUBRUTALISM) {
+                when (activeRoute) {
+                    "ATTENDANCE" -> AttendanceMainTabScreen(
+                        activeUser = admin,
+                        allUsers = users,
+                        unreadNotificationCount = 2,
+                        onNavigateRoute = {},
+                        onSwitchPersona = {}
+                    )
+                    "CASH" -> CashMainTabScreen(
+                        activeUser = admin,
+                        users = users,
+                        transactions = transactions,
+                        unreadNotificationCount = 2,
+                        selectedTabIndex = 0,
+                        onSelectTabIndex = {},
+                        onNavigate = {},
+                        onOpenTransactionDetail = {},
+                        onOpenBillVerifyDetail = {},
+                        onOpenRoleSwitcher = {}
+                    )
+                    "TASKS" -> TasksMainTabScreen(
+                        activeUser = admin,
+                        assignments = assignments,
+                        unreadNotificationCount = 2,
+                        onOpenAssignmentDetail = {},
+                        onToggleComplete = {},
+                        onNavigate = {},
+                        onOpenRoleSwitcher = {}
+                    )
+                    "BOT_CONNECTED" -> BotPanelScreen(
+                        activeUser = admin,
+                        botState = connectedBot,
+                        dispatchLogs = dispatchLogs,
+                        validWaCount = 2,
+                        onToggleConnectionSimulated = {},
+                        onPterodactylControl = {},
+                        onNavigate = {},
+                        onBack = {}
+                    )
+                    "BOT_SETTINGS" -> BotSettingsAdminScreen(
+                        botState = connectedBot,
+                        users = users,
+                        onUpdateMaxPerHour = {},
+                        onNavigateReconnect = {},
+                        onNavigateFailureLogs = {},
+                        onNavigateProblematicNumbers = {},
+                        onBack = {}
+                    )
+                    "BOT_QR" -> BotReconnectQrPairingScreen(
+                        botState = connectedBot,
+                        onGenerateNewCode = {},
+                        onReconnectSuccess = {},
+                        onBack = {}
+                    )
+                    "USERS" -> UserManagementListScreen(
+                        users = users,
+                        onOpenUserDetail = {},
+                        onNavigateAddUser = {},
+                        onNavigateImportMassal = {},
+                        onNavigateProblematicNumbers = {},
+                        onBack = {}
+                    )
+                    "NOTIFS" -> NotificationsCenterScreen(
+                        notifications = notifications,
+                        onMarkAllRead = {},
+                        onDeleteRead = {},
+                        onNotificationClick = {},
+                        onDeleteSingle = {},
+                        onOpenSettings = {},
+                        onBack = {}
+                    )
+                    "PROFILE" -> ProfileMainScreen(
+                        activeUser = admin,
+                        onSwitchPersona = {},
+                        onNavigate = {},
+                        onStartTourAgain = {},
+                        onBack = {}
+                    )
+                    "APPEARANCE" -> SettingsAppearanceScreen(
+                        currentStyle = VisualThemeStyle.NEUBRUTALISM,
+                        darkTheme = false,
+                        lowRamSolidMode = false,
+                        onApplyTheme = { _, _, _ -> },
+                        onBack = {}
+                    )
+                    "ANNOUNCEMENTS" -> AnnouncementsListScreen(
+                        activeUser = admin,
+                        announcements = announcements,
+                        onOpenDetail = {},
+                        onNavigateCreate = {},
+                        onBack = {}
+                    )
+                    "HELP" -> HelpCenterScreen(
+                        activeUser = admin,
+                        onOpenArticle = {},
+                        onStartTourAgain = {},
+                        onBack = {}
+                    )
+                    "LOCKED" -> LockedAccountScreen(
+                        onBackToLogin = {},
+                        onContactAdmin = {}
+                    )
+                }
+            }
+        }
+
+        val screens = listOf(
+            "ATTENDANCE" to "redesigned_01_attendance_populated.png",
+            "CASH" to "redesigned_02_cash_populated.png",
+            "TASKS" to "redesigned_03_tasks_populated.png",
+            "BOT_CONNECTED" to "redesigned_04_bot_panel_connected.png",
+            "BOT_SETTINGS" to "redesigned_05_bot_settings_admin.png",
+            "BOT_QR" to "redesigned_06_bot_qr_pairing.png",
+            "USERS" to "redesigned_07_user_management.png",
+            "NOTIFS" to "redesigned_08_notifications_populated.png",
+            "PROFILE" to "redesigned_09_profile_main.png",
+            "APPEARANCE" to "redesigned_10_settings_appearance.png",
+            "ANNOUNCEMENTS" to "redesigned_11_announcements_populated.png",
+            "HELP" to "redesigned_12_help_center.png",
+            "LOCKED" to "redesigned_13_locked_account.png"
+        )
+
+        screens.forEach { (route, fileName) ->
+            activeRoute = route
+            composeTestRule.waitForIdle()
+            saveRootViewScreenshot(rootView, fileName)
+        }
+    }
+
     private fun saveRootViewScreenshot(rootView: View?, fileName: String) {
         composeTestRule.runOnIdle {
             val v = rootView ?: return@runOnIdle
@@ -740,7 +1077,10 @@ class ExampleRobolectricTest {
             val canvas = Canvas(bitmap)
             v.draw(canvas)
 
-            val outDir = File("/app/applet/.aistudio/artifacts/brain/ce7448c2-f2b8-4313-af9c-f5bba84c793f")
+            val outDir = File("/app/applet/.aistudio/artifacts/brain/3775e327-14dd-49b5-9bc7-2173cc404ffc")
+            if (!outDir.exists()) {
+                outDir.mkdirs()
+            }
             if (outDir.exists()) {
                 FileOutputStream(File(outDir, fileName)).use { fos ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 95, fos)

@@ -100,16 +100,21 @@ import com.example.ui.components.IxhDsChip
 import com.example.ui.components.IxhFeedbackType
 import com.example.ui.components.IxhLoadingIndicator
 import com.example.ui.components.IxhNeubrutalCheckbox
+import com.example.ui.components.IxhOrganicModuleBanner
+import com.example.ui.components.IxhOrganicWaveDivider
 import com.example.ui.components.IxhPasswordField
 import com.example.ui.components.IxhPrimaryButton
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhStateFeedbackBanner
 import com.example.ui.components.IxhStatusChip
 import com.example.ui.components.IxhSubScreenTopBar
+import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.IxhTextField
 import com.example.ui.components.IxhWaBubblePreview
 import com.example.ui.components.ixhBrandGradientBackground
+import com.example.ui.components.ixhOrganicScreenBackdrop
 import com.example.ui.components.ixhTactileShadow
+import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhAmber
 import com.example.ui.theme.IxhBackgroundCream
 import com.example.ui.theme.IxhBorder
@@ -1446,7 +1451,7 @@ fun ForgotPasswordScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
@@ -1526,10 +1531,11 @@ fun ForgotPasswordScreen(
 
 @Composable
 fun LockedAccountScreen(onBackToLogin: () -> Unit, onContactAdmin: () -> Unit) {
+    val bannerShape = RoundedCornerShape(topStart = 26.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 28.dp)
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -1537,33 +1543,42 @@ fun LockedAccountScreen(onBackToLogin: () -> Unit, onContactAdmin: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .neubrutalShadow(cornerRadius = 22.dp, offsetX = 3.2.dp, offsetY = 4.4.dp)
+                .clip(bannerShape)
                 .background(IxhYellowLight)
-                .border(1.8.dp, IxhInk, RoundedCornerShape(16.dp))
+                .border(2.5.dp, IxhInk, bannerShape)
                 .padding(20.dp),
             contentAlignment = Alignment.Center
         ) {
             IxhBlobMascot(expression = BlobExpression.SAD_ERROR, size = 116.dp)
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Akun Dikunci Sementara", style = MaterialTheme.typography.headlineMedium)
         Text(
-            "Terlalu banyak percobaan login yang gagal.",
+            text = "Akun Dikunci Sementara",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.ExtraBold,
+            color = IxhInk
+        )
+        Text(
+            text = "Terlalu banyak percobaan login yang gagal.",
             style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold,
             color = IxhTextSecondary
         )
         Spacer(modifier = Modifier.height(18.dp))
         Box(
             modifier = Modifier
-                .size(110.dp)
+                .size(116.dp)
+                .neubrutalShadow(cornerRadius = 58.dp, offsetX = 2.8.dp, offsetY = 3.8.dp)
                 .clip(CircleShape)
                 .background(IxhWhite)
-                .border(4.dp, IxhRed, CircleShape),
+                .border(4.dp, IxhRed, CircleShape)
+                .border(2.dp, IxhInk, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("05:00", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
-                Text("jeda keamanan", style = MaterialTheme.typography.labelSmall)
+                Text("05:00", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = IxhInk)
+                Text("jeda keamanan", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = IxhTextSecondary)
             }
         }
         Spacer(modifier = Modifier.height(22.dp))
@@ -1583,31 +1598,32 @@ fun OnboardingFirstLoginScreen(
     var confirmPass by remember { mutableStateOf("") }
     var passVisible by remember { mutableStateOf(false) }
     var waConsentChecked by remember { mutableStateOf(true) }
-    var selectedPhrase by remember { mutableStateOf("Tagihan kas saya") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         when (step) {
             0 -> {
-                Text("Buat Password Baru", style = MaterialTheme.typography.headlineMedium)
-                Text(
-                    "Akun @$username wajib memperbarui password sementara dari Admin.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = IxhTextSecondary
+                IxhOrganicModuleBanner(
+                    eyebrowTag = "AKTIVASI AKUN PERTAMA",
+                    title = "Buat Password Baru",
+                    subtitle = "Akun @$username wajib memperbarui password sementara dari Admin.",
+                    iconType = IxhSystemIconType.PENGATURAN
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                val mascotBoxShape = RoundedCornerShape(topStart = 22.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 24.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
+                        .neubrutalShadow(cornerRadius = 18.dp, offsetX = 2.6.dp, offsetY = 3.6.dp)
+                        .clip(mascotBoxShape)
                         .background(IxhYellowLight)
-                        .border(1.5.dp, IxhInk, RoundedCornerShape(14.dp))
-                        .padding(12.dp),
+                        .border(2.3.dp, IxhInk, mascotBoxShape)
+                        .padding(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1617,47 +1633,31 @@ fun OnboardingFirstLoginScreen(
                         )
                         Text(
                             text = if (passVisible) "Password terlihat: Blob menutup mata" else "Password tersembunyi: mata terbuka",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = IxhInk
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(10.dp))
-                Text("Password baru", style = MaterialTheme.typography.labelMedium)
-                OutlinedTextField(
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("PASSWORD BARU", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
+                Spacer(modifier = Modifier.height(4.dp))
+                IxhPasswordField(
                     value = newPass,
                     onValueChange = { newPass = it },
-                    placeholder = { Text("Minimal 8 karakter (huruf & angka)") },
-                    visualTransformation = if (passVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { passVisible = !passVisible }) {
-                            Icon(
-                                if (passVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
-                                contentDescription = "Ubah visibilitas password"
-                            )
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = IxhWhite,
-                        unfocusedContainerColor = IxhWhite
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    passwordVisible = passVisible,
+                    onTogglePasswordVisible = { passVisible = !passVisible },
+                    placeholder = "Minimal 8 karakter (huruf & angka)"
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Konfirmasi password", style = MaterialTheme.typography.labelMedium)
-                OutlinedTextField(
+                Spacer(modifier = Modifier.height(10.dp))
+                Text("KONFIRMASI PASSWORD", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
+                Spacer(modifier = Modifier.height(4.dp))
+                IxhPasswordField(
                     value = confirmPass,
                     onValueChange = { confirmPass = it },
-                    placeholder = { Text("Ulangi password baru") },
-                    visualTransformation = if (passVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = IxhWhite,
-                        unfocusedContainerColor = IxhWhite
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    passwordVisible = passVisible,
+                    onTogglePasswordVisible = { passVisible = !passVisible },
+                    placeholder = "Ulangi password baru"
                 )
 
                 val hasLen = newPass.length >= 8
@@ -1682,29 +1682,30 @@ fun OnboardingFirstLoginScreen(
             }
 
             1 -> {
-                Text("Pesan Kelas via WhatsApp", style = MaterialTheme.typography.headlineMedium)
-                Text(
-                    "Persetujuan notifikasi WhatsApp kelas IX-H",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = IxhTextSecondary
+                IxhOrganicModuleBanner(
+                    eyebrowTag = "NOTIFIKASI WHATSAPP",
+                    title = "Pesan Kelas via WA",
+                    subtitle = "Persetujuan notifikasi resmi kelas IX-H",
+                    iconType = IxhSystemIconType.BOT
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                IxhCard {
+                Spacer(modifier = Modifier.height(12.dp))
+                IxhCard(hasHardShadow = true) {
                     listOf(
                         Icons.AutoMirrored.Outlined.Send to "Bot IX-H Hub hanya mengirim informasi tagihan dan pengingat kelas.",
                         Icons.Outlined.Shield to "Kamu bisa membalas STOP kapan saja untuk menghentikan pesan otomatis.",
                         Icons.Outlined.Lock to "Nomor WhatsApp hanya dapat diakses oleh Admin dan Pengurus kelas."
                     ).forEach { (ic, desc) ->
                         Row(
-                            modifier = Modifier.padding(vertical = 5.dp),
+                            modifier = Modifier.padding(vertical = 6.dp),
                             verticalAlignment = Alignment.Top
                         ) {
-                            IxhCircleIcon(icon = ic, size = 28.dp)
+                            IxhCircleIcon(icon = ic, hasBorder = true, size = 30.dp)
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text(desc, style = MaterialTheme.typography.bodySmall, color = IxhInk)
+                            Text(desc, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = IxhInk)
                         }
                     }
                 }
+                IxhOrganicWaveDivider()
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -1717,6 +1718,7 @@ fun OnboardingFirstLoginScreen(
                     Text(
                         "Saya menyetujui penggunaan nomor WhatsApp untuk informasi kelas IX-H.",
                         style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
                         color = IxhInk
                     )
                 }

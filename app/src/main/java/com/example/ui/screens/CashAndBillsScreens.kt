@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,8 +44,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -75,15 +74,20 @@ import com.example.ui.components.IxhCard
 import com.example.ui.components.IxhCircleIcon
 import com.example.ui.components.IxhEmptyStateCard
 import com.example.ui.components.IxhOrganicModuleBanner
+import com.example.ui.components.IxhOrganicWaveDivider
 import com.example.ui.components.IxhPrimaryButton
+import com.example.ui.components.IxhSculptedFab
+import com.example.ui.components.IxhSculptedFilterChip
 import com.example.ui.components.IxhSculptedSectionHeader
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhSegmentedTabs
 import com.example.ui.components.IxhStatusChip
+import com.example.ui.components.IxhStyledTextField
 import com.example.ui.components.IxhSubScreenTopBar
 import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.IxhTopBrandHeader
 import com.example.ui.components.IxhWaBubblePreview
+import com.example.ui.components.ixhOrganicScreenBackdrop
 import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhAmber
 import com.example.ui.theme.IxhAmberBg
@@ -140,7 +144,7 @@ fun CashMainTabScreen(
     val incomeCount = transactions.count { it.isIncome }
     val expenseCount = transactions.count { !it.isIncome }
 
-    Box(modifier = Modifier.fillMaxSize().background(IxhCream)) {
+    Box(modifier = Modifier.fillMaxSize().ixhOrganicScreenBackdrop()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -348,6 +352,8 @@ fun CashMainTabScreen(
                     }
                 }
 
+                IxhOrganicWaveDivider()
+
                 IxhSculptedSectionHeader(
                     title = "Transaksi Terbaru",
                     actionLabel = "Semua",
@@ -455,8 +461,9 @@ fun CashMainTabScreen(
                             progress = { paidRatio },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(6.dp)),
+                                .height(10.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .border(1.8.dp, IxhInk, RoundedCornerShape(6.dp)),
                             color = IxhGreen,
                             trackColor = IxhWhite
                         )
@@ -518,25 +525,17 @@ fun CashMainTabScreen(
                         "Tunggakan ($arrearsCount)"
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         filterLabels.forEachIndexed { idx, label ->
-                            val selected = billFilterIndex == idx
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(if (selected) IxhInk else IxhSurfaceMuted)
-                                    .clickable { billFilterIndex = idx }
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Text(
-                                    text = label,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (selected) IxhWhite else IxhTextSecondary
-                                )
-                            }
+                            IxhSculptedFilterChip(
+                                label = label,
+                                selected = billFilterIndex == idx,
+                                onClick = { billFilterIndex = idx }
+                            )
                         }
                     }
 
@@ -578,33 +577,21 @@ fun CashMainTabScreen(
 
         // FAB + Catat Transaksi / Buat Tagihan for Admin/Pengurus
         if (!isSiswa) {
-            val fabShape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
-            Box(
+            IxhSculptedFab(
+                icon = Icons.Outlined.Add,
+                contentDescription = "Tambah Transaksi atau Tagihan",
+                testTag = "kas_fab_add",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 18.dp, bottom = 18.dp)
-                    .size(54.dp)
-                    .neubrutalShadow(cornerRadius = 16.dp, offsetX = 2.8.dp, offsetY = 4.dp)
-                    .clip(fabShape)
-                    .background(IxhYellow)
-                    .border(2.5.dp, IxhInk, fabShape)
-                    .clickable {
-                        if (selectedTabIndex == 0) {
-                            onNavigate(AppScreenRoute.CASH_ADD_TRANSACTION)
-                        } else {
-                            onNavigate(AppScreenRoute.BILLS_CREATE)
-                        }
+                    .padding(end = 18.dp, bottom = 18.dp),
+                onClick = {
+                    if (selectedTabIndex == 0) {
+                        onNavigate(AppScreenRoute.CASH_ADD_TRANSACTION)
+                    } else {
+                        onNavigate(AppScreenRoute.BILLS_CREATE)
                     }
-                    .testTag("kas_fab_add"),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Tambah Transaksi atau Tagihan",
-                    tint = IxhInk,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+                }
+            )
         }
     }
 
@@ -738,15 +725,17 @@ private fun StudentBillRowItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(32.dp)
+                    .neubrutalShadow(cornerRadius = 16.dp, offsetX = 1.4.dp, offsetY = 1.8.dp)
                     .clip(CircleShape)
-                    .background(IxhYellowLight),
+                    .background(IxhYellowLight)
+                    .border(1.8.dp, IxhInk, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "%02d".format(student.absenNo),
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
             }
@@ -799,72 +788,60 @@ fun AddCashTransactionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Catat Transaksi", onBack = onBack)
 
+        IxhOrganicModuleBanner(
+            eyebrowTag = "JURNAL KAS IX-H",
+            title = "Input Transaksi Baru",
+            subtitle = "Dicatat oleh $actorName • Otomatis perbarui saldo kas kelas",
+            iconType = IxhSystemIconType.KAS
+        )
+
         IxhAlertBanner(
             text = "Pembayaran kas siswa dicatat otomatis dari tab Tagihan.",
             tone = ChipTone.BLUE
         )
 
-        Text(
-            text = "JENIS TRANSAKSI",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "Jenis & Rincian")
         IxhSegmentedTabs(
             tabs = listOf("Pemasukan Lain", "Pengeluaran"),
             selectedIndex = typeIndex,
             onTabSelected = { typeIndex = it }
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = amountText,
             onValueChange = { amountText = it.filter { ch -> ch.isDigit() } },
-            label = { Text("Nominal (Rp)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Nominal (Rp)",
+            placeholder = "Contoh: 25000"
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = titleText,
             onValueChange = { titleText = it },
-            label = { Text("Keterangan") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Keterangan",
+            placeholder = "Contoh: Beli spidol & penghapus papan"
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = dateText,
             onValueChange = { dateText = it },
-            label = { Text("Tanggal") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Tanggal",
+            placeholder = "Hari ini"
         )
 
-        Text(
-            text = if (typeIndex == 1) "BUKTI NOTA (WAJIB UNTUK PENGELUARAN)" else "BUKTI TRANSAKSI (OPSIONAL)",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
+        IxhSculptedSectionHeader(
+            title = if (typeIndex == 1) "Bukti Nota (Wajib Pengeluaran)" else "Bukti Transaksi (Opsional)"
         )
         IxhCard(
             backgroundColor = if (hasProofAttached) IxhGreenBg else IxhSurfaceMuted,
-            borderColor = if (hasProofAttached) IxhGreen else IxhBorder,
+            borderColor = IxhInk,
+            hasHardShadow = true,
             onClick = { hasProofAttached = !hasProofAttached }
         ) {
             Row(
@@ -875,14 +852,14 @@ fun AddCashTransactionScreen(
                 Icon(
                     imageVector = Icons.Outlined.AddAPhoto,
                     contentDescription = null,
-                    tint = if (hasProofAttached) IxhGreenText else IxhTextSecondary
+                    tint = if (hasProofAttached) IxhGreenText else IxhInk
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (hasProofAttached) "Nota_Spidol_04Nov.jpg terlampir (Ketuk untuk lepas)" else "+ Unggah Foto Nota / Bukti",
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (hasProofAttached) IxhGreenText else IxhTextSecondary
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (hasProofAttached) IxhGreenText else IxhInk
                 )
             }
         }
@@ -923,6 +900,7 @@ fun CashTransactionDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -942,7 +920,8 @@ fun CashTransactionDetailScreen(
         val item = tx
         IxhCard(
             backgroundColor = if (item.isIncome) IxhGreenBg else IxhRedBg,
-            borderColor = if (item.isIncome) IxhGreen else IxhRed,
+            borderColor = IxhInk,
+            hasHardShadow = true,
             contentPadding = PaddingValues(16.dp)
         ) {
             Column(
@@ -968,7 +947,7 @@ fun CashTransactionDetailScreen(
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
             }
@@ -983,18 +962,16 @@ fun CashTransactionDetailScreen(
         }
 
         IxhCard(backgroundColor = IxhWhite) {
-            Text(
-                text = "CATATAN & BUKTI TRANSAKSI",
-                style = MaterialTheme.typography.labelSmall,
-                color = IxhTextSecondary
-            )
+            IxhSculptedSectionHeader(title = "Catatan & Bukti")
             Spacer(modifier = Modifier.height(6.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(82.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(IxhSurfaceMuted),
+                    .neubrutalShadow(cornerRadius = 12.dp, offsetX = 1.8.dp, offsetY = 2.4.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(IxhYellowLight.copy(alpha = 0.45f))
+                    .border(2.dp, IxhInk, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1006,7 +983,8 @@ fun CashTransactionDetailScreen(
                     Text(
                         text = item.proofNote.ifEmpty { "Catatan transaksi tersimpan di buku kas" },
                         style = MaterialTheme.typography.labelSmall,
-                        color = IxhTextSecondary
+                        fontWeight = FontWeight.Bold,
+                        color = IxhInk
                     )
                 }
             }
@@ -1057,13 +1035,14 @@ fun CashHistoryExportScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Riwayat & Ekspor Kas", onBack = onBack)
 
-        IxhCard(backgroundColor = IxhWhite) {
+        IxhCard(backgroundColor = IxhYellowLight, hasHardShadow = true) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1072,7 +1051,7 @@ fun CashHistoryExportScreen(
                 Text(
                     text = "Rekapitulasi Kas",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
                 IxhStatusChip(
@@ -1088,38 +1067,35 @@ fun CashHistoryExportScreen(
                 Text(
                     text = "Masuk: ${formatIdr(totalIncome)}",
                     style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = IxhGreen
+                    fontWeight = FontWeight.ExtraBold,
+                    color = IxhGreenText
                 )
                 Text(
                     text = "Keluar: ${formatIdr(totalExpense)}",
                     style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = IxhRed
                 )
             }
         }
 
         val filters = listOf("Semua", "Masuk", "Keluar", "Dari tagihan")
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             filters.forEachIndexed { idx, label ->
-                val sel = filterIdx == idx
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (sel) IxhInk else IxhSurfaceMuted)
-                        .clickable { filterIdx = idx }
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = label,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (sel) IxhWhite else IxhTextSecondary
-                    )
-                }
+                IxhSculptedFilterChip(
+                    label = label,
+                    selected = filterIdx == idx,
+                    onClick = { filterIdx = idx }
+                )
             }
         }
+
+        IxhOrganicWaveDivider()
 
         if (filtered.isEmpty()) {
             IxhEmptyStateCard(
@@ -1167,54 +1143,42 @@ fun CreateBillScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Buat Tagihan Kas", onBack = onBack)
 
-        OutlinedTextField(
+        IxhOrganicModuleBanner(
+            eyebrowTag = "TAGIHAN PERIODE BARU",
+            title = "Atur Iuran Kelas IX-H",
+            subtitle = "Terapkan otomatis ke daftar tagihan anggota kelas",
+            iconType = IxhSystemIconType.TAGIHAN
+        )
+
+        IxhStyledTextField(
             value = billName,
             onValueChange = { billName = it },
-            label = { Text("Nama Periode Tagihan") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Nama Periode Tagihan"
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = amountText,
                 onValueChange = { amountText = it.filter { c -> c.isDigit() } },
-                label = { Text("Nominal / Siswa (Rp)") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = IxhWhite,
-                    unfocusedContainerColor = IxhWhite
-                )
+                label = "Nominal / Siswa (Rp)",
+                modifier = Modifier.weight(1f)
             )
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = dueDateText,
                 onValueChange = { dueDateText = it },
-                label = { Text("Jatuh Tempo") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = IxhWhite,
-                    unfocusedContainerColor = IxhWhite
-                )
+                label = "Jatuh Tempo",
+                modifier = Modifier.weight(1f)
             )
         }
 
-        Text(
-            text = "TARGET SISWA",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "Target Penerima")
         IxhSegmentedTabs(
             tabs = listOf("Semua Anggota Aktif", "Pilih Tertentu"),
             selectedIndex = targetOption,
@@ -1273,17 +1237,14 @@ fun BillPreviewScheduleScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Pratinjau & Jadwal WA", onBack = onBack)
 
-        Text(
-            text = "PRATINJAU PESAN WHATSAPP PERSONAL",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "Pratinjau Pesan WhatsApp")
 
         IxhWaBubblePreview(
             senderTitle = "IX-H Hub • Tagihan Kas",
@@ -1352,6 +1313,7 @@ fun BillDeliveryStatusScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1360,7 +1322,8 @@ fun BillDeliveryStatusScreen(
 
         IxhCard(
             backgroundColor = IxhYellowLight,
-            borderColor = IxhInk
+            borderColor = IxhInk,
+            hasHardShadow = true
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1370,7 +1333,7 @@ fun BillDeliveryStatusScreen(
                 Text(
                     text = "Rekap Pengiriman Tagihan IX-H",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
                 IxhStatusChip(
@@ -1383,8 +1346,9 @@ fun BillDeliveryStatusScreen(
                 progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(6.dp)),
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .border(1.8.dp, IxhInk, RoundedCornerShape(6.dp)),
                 color = IxhGreen,
                 trackColor = IxhWhite
             )
@@ -1463,6 +1427,7 @@ fun BillVerifyDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1488,7 +1453,8 @@ fun BillVerifyDetailScreen(
 
         IxhCard(
             backgroundColor = if (isAlreadyPaid) IxhGreenBg else IxhYellowLight,
-            borderColor = IxhInk
+            borderColor = IxhInk,
+            hasHardShadow = true
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1559,16 +1525,10 @@ fun BillVerifyDetailScreen(
                 onTabSelected = { selectedMethodIndex = it }
             )
 
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = noteText,
                 onValueChange = { noteText = it },
-                label = { Text("Catatan Konfirmasi (Opsional)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = IxhWhite,
-                    unfocusedContainerColor = IxhWhite
-                )
+                label = "Catatan Konfirmasi (Opsional)"
             )
 
             IxhPrimaryButton(
@@ -1613,6 +1573,7 @@ fun BillReminderSendScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1685,6 +1646,7 @@ fun StudentMyBillsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1693,6 +1655,7 @@ fun StudentMyBillsScreen(
             title = "Tagihan Kas Saya",
             onBack = onBack
         )
+        IxhOrganicWaveDivider()
 
         if (!isPaid && billAmt > 0) {
             IxhCard(

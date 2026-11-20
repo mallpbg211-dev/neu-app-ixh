@@ -32,8 +32,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,13 +60,19 @@ import com.example.ui.components.IxhCircleIcon
 import com.example.ui.components.IxhEmptyStateCard
 import com.example.ui.components.IxhNeubrutalToggle
 import com.example.ui.components.IxhOrganicModuleBanner
+import com.example.ui.components.IxhOrganicWaveDivider
 import com.example.ui.components.IxhPrimaryButton
+import com.example.ui.components.IxhSculptedFab
+import com.example.ui.components.IxhSculptedFilterChip
+import com.example.ui.components.IxhSculptedSectionHeader
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhSegmentedTabs
 import com.example.ui.components.IxhStatusChip
+import com.example.ui.components.IxhStyledTextField
 import com.example.ui.components.IxhSubScreenTopBar
 import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.IxhTopBrandHeader
+import com.example.ui.components.ixhOrganicScreenBackdrop
 import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhAmber
 import com.example.ui.theme.IxhAmberBg
@@ -118,7 +122,7 @@ fun ScheduleMainTabScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -228,6 +232,7 @@ fun ScheduleMainTabScreen(
         IxhCard(
             backgroundColor = IxhYellowLight,
             borderColor = IxhInk,
+            hasHardShadow = true,
             onClick = { onNavigate(AppScreenRoute.SCHEDULE_NIGHT_REMINDER) }
         ) {
             Row(
@@ -247,7 +252,7 @@ fun ScheduleMainTabScreen(
                         Text(
                             text = "Pengingat Malam Hari • 20.00 WIB",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = IxhInk
                         )
                         Text(
@@ -260,11 +265,13 @@ fun ScheduleMainTabScreen(
                 Text(
                     text = "Atur →",
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
             }
         }
+
+        IxhOrganicWaveDivider()
 
         val isSiswa = activeUser.role == UserRole.SISWA.name
         if (daySchedules.isEmpty()) {
@@ -450,86 +457,74 @@ fun ScheduleFormScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Tambah Jadwal Pelajaran", onBack = onBack)
 
-        Text("PILIH HARI SEKOLAH", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
+        IxhOrganicModuleBanner(
+            eyebrowTag = "PENJADWALAN IX-H",
+            title = "Atur Slot Mata Pelajaran",
+            subtitle = "Jadwal tersimpan lokal & siap diakses mode offline",
+            iconType = IxhSystemIconType.JADWAL
+        )
+
+        IxhSculptedSectionHeader(title = "Pilih Hari Sekolah")
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             days.forEach { d ->
-                val sel = selectedDay == d
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (sel) IxhYellow else IxhWhite)
-                        .border(1.5.dp, if (sel) IxhInk else IxhBorder, RoundedCornerShape(10.dp))
-                        .clickable { selectedDay = d }
-                        .padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(d, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, color = IxhInk)
-                }
+                IxhSculptedFilterChip(
+                    label = d,
+                    selected = selectedDay == d,
+                    onClick = { selectedDay = d },
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = startTime,
                 onValueChange = { startTime = it },
-                label = { Text("Jam Mulai") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+                label = "Jam Mulai",
+                modifier = Modifier.weight(1f)
             )
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = endTime,
                 onValueChange = { endTime = it },
-                label = { Text("Jam Selesai") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+                label = "Jam Selesai",
+                modifier = Modifier.weight(1f)
             )
         }
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = subject,
             onValueChange = { subject = it },
-            label = { Text("Mata Pelajaran") },
-            placeholder = { Text("Contoh: Matematika") },
-            modifier = Modifier.fillMaxWidth().testTag("schedule_subject_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Mata Pelajaran",
+            placeholder = "Contoh: Matematika",
+            testTag = "schedule_subject_input"
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = teacher,
                 onValueChange = { teacher = it },
-                label = { Text("Nama Guru") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+                label = "Nama Guru",
+                modifier = Modifier.weight(1f)
             )
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = room,
                 onValueChange = { room = it },
-                label = { Text("Ruangan") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+                label = "Ruangan",
+                modifier = Modifier.weight(1f)
             )
         }
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = notes,
             onValueChange = { notes = it },
-            label = { Text("Catatan Perlengkapan (Opsional)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Catatan Perlengkapan (Opsional)"
         )
 
         IxhCard(backgroundColor = IxhWhite) {
@@ -538,7 +533,7 @@ fun ScheduleFormScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Tandai sebagai Jam Istirahat", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = IxhInk)
+                Text("Tandai sebagai Jam Istirahat", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                 IxhNeubrutalToggle(checked = isBreak, onCheckedChange = { isBreak = it })
             }
         }
@@ -563,6 +558,7 @@ fun ScheduleDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -659,13 +655,14 @@ fun ScheduleNightReminderScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Pengingat Persiapan", onBack = onBack)
 
-        IxhCard(backgroundColor = IxhWhite) {
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -675,7 +672,7 @@ fun ScheduleNightReminderScreen(
                     Text(
                         text = "Aktifkan Pengingat Malam",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
@@ -688,36 +685,22 @@ fun ScheduleNightReminderScreen(
             }
         }
 
-        Text(
-            text = "PILIH JAM PENGINGAT",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "Pilih Jam Pengingat")
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             timeOptions.forEach { t ->
-                val sel = selectedTime == t
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (sel) IxhYellow else IxhWhite)
-                        .border(1.5.dp, if (sel) IxhInk else IxhBorder, RoundedCornerShape(10.dp))
-                        .clickable { selectedTime = t }
-                        .padding(vertical = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = t.removeSuffix(" WIB"),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = IxhInk
-                    )
-                }
+                IxhSculptedFilterChip(
+                    label = t.removeSuffix(" WIB"),
+                    selected = selectedTime == t,
+                    onClick = { selectedTime = t },
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
+
+        IxhOrganicWaveDivider()
 
         Text(
             text = "CONTOH NOTIFIKASI MALAM INI",
@@ -758,13 +741,14 @@ fun AcademicCalendarScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Kalender Akademik", onBack = onBack)
 
-        IxhCard(backgroundColor = IxhWhite) {
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -785,7 +769,7 @@ fun AcademicCalendarScreen(
                     Text(
                         text = d,
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = if (d == "Min") IxhRed else IxhTextSecondary
                     )
                 }
@@ -809,9 +793,9 @@ fun AcademicCalendarScreen(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(if (dayNum == 1) IxhYellowLight else Color.Transparent)
+                                .background(if (dayNum == 1) IxhYellow else Color.Transparent)
                                 .then(
-                                    if (dayNum == 1) Modifier.border(1.5.dp, IxhInk, CircleShape)
+                                    if (dayNum == 1) Modifier.border(2.dp, IxhInk, CircleShape)
                                     else Modifier
                                 ),
                             contentAlignment = Alignment.Center
@@ -819,7 +803,7 @@ fun AcademicCalendarScreen(
                             Text(
                                 text = dayNum.toString(),
                                 fontSize = 11.sp,
-                                fontWeight = if (dayNum == 1) FontWeight.ExtraBold else FontWeight.Medium,
+                                fontWeight = if (dayNum == 1) FontWeight.ExtraBold else FontWeight.SemiBold,
                                 color = IxhInk
                             )
                         }
@@ -828,12 +812,8 @@ fun AcademicCalendarScreen(
             }
         }
 
-        Text(
-            text = "Agenda & Tenggat Tugas Aktif",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = IxhInk
-        )
+        IxhOrganicWaveDivider()
+        IxhSculptedSectionHeader(title = "Agenda & Tenggat Tugas Aktif")
 
         if (assignments.isEmpty() && schedules.isEmpty()) {
             IxhEmptyStateCard(
@@ -906,7 +886,7 @@ fun TasksMainTabScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(IxhCream)) {
+    Box(modifier = Modifier.fillMaxSize().ixhOrganicScreenBackdrop()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -999,6 +979,7 @@ fun TasksMainTabScreen(
                 }
             }
 
+            IxhOrganicWaveDivider()
             IxhSegmentedTabs(
                 tabs = listOf("Semua ($totalTasks)", "Belum ($upcomingTasks)", "Selesai ($completedTasks)"),
                 selectedIndex = filterTab,
@@ -1082,27 +1063,15 @@ fun TasksMainTabScreen(
         }
 
         if (!isSiswa) {
-            val fabShape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
-            Box(
+            IxhSculptedFab(
+                icon = Icons.Outlined.Add,
+                contentDescription = "Tambah Tugas",
+                testTag = "tasks_fab_add",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 18.dp, bottom = 18.dp)
-                    .size(54.dp)
-                    .neubrutalShadow(cornerRadius = 16.dp, offsetX = 2.8.dp, offsetY = 4.dp)
-                    .clip(fabShape)
-                    .background(IxhYellow)
-                    .border(2.5.dp, IxhInk, fabShape)
-                    .clickable { onNavigate(AppScreenRoute.ASSIGNMENT_FORM) }
-                    .testTag("tasks_fab_add"),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Tambah Tugas",
-                    tint = IxhInk,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+                    .padding(end = 18.dp, bottom = 18.dp),
+                onClick = { onNavigate(AppScreenRoute.ASSIGNMENT_FORM) }
+            )
         }
     }
 
@@ -1199,6 +1168,7 @@ fun TaskDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1320,69 +1290,52 @@ fun TaskFormScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         IxhSubScreenTopBar(title = "Tambah Tugas Baru", onBack = onBack)
 
-        OutlinedTextField(
+        IxhOrganicModuleBanner(
+            eyebrowTag = "PENUGASAN KELAS IX-H",
+            title = "Buat Tugas Sekolah",
+            subtitle = "Lengkapi detail tugas & prioritas tenggat otomatis",
+            iconType = IxhSystemIconType.TUGAS
+        )
+
+        IxhStyledTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Judul Tugas") },
-            placeholder = { Text("Contoh: Latihan Bab 4 — Fungsi Kuadrat") },
-            modifier = Modifier.fillMaxWidth().testTag("task_title_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Judul Tugas",
+            placeholder = "Contoh: Latihan Bab 4 — Fungsi Kuadrat",
+            testTag = "task_title_input"
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = subject,
                 onValueChange = { subject = it },
-                label = { Text("Mata Pelajaran") },
-                placeholder = { Text("Matematika") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = IxhWhite,
-                    unfocusedContainerColor = IxhWhite
-                )
+                label = "Mata Pelajaran",
+                placeholder = "Matematika",
+                modifier = Modifier.weight(1f)
             )
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = teacher,
                 onValueChange = { teacher = it },
-                label = { Text("Guru") },
-                placeholder = { Text("Nama Guru") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = IxhWhite,
-                    unfocusedContainerColor = IxhWhite
-                )
+                label = "Guru",
+                placeholder = "Nama Guru",
+                modifier = Modifier.weight(1f)
             )
         }
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = deadlineLabel,
             onValueChange = { deadlineLabel = it },
-            label = { Text("Tenggat Waktu") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Tenggat Waktu"
         )
 
-        Text(
-            text = "TINGKAT MENDESAK (GARIS WARNA)",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "Tingkat Mendesak (Garis Warna)")
         IxhSegmentedTabs(
             tabs = listOf("≤1 Hari (Merah)", "2-3 Hari (Kuning)", "≥4 Hari (Biru)"),
             selectedIndex = when {
@@ -1399,16 +1352,12 @@ fun TaskFormScreen(
             }
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Deskripsi & Instruksi") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Deskripsi & Instruksi",
+            singleLine = false,
+            minLines = 3
         )
 
         IxhCard(backgroundColor = IxhWhite) {
@@ -1421,7 +1370,7 @@ fun TaskFormScreen(
                     Text(
                         text = "Kirim Pengingat H-1",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(

@@ -22,19 +22,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PowerSettingsNew
+import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Send
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.StopCircle
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,11 +48,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.local.ActivityLogEntity
@@ -67,14 +76,24 @@ import com.example.ui.components.IxhAlertBanner
 import com.example.ui.components.IxhBlobMascot
 import com.example.ui.components.IxhCard
 import com.example.ui.components.IxhCircleIcon
+import com.example.ui.components.IxhDualToneSystemIcon
 import com.example.ui.components.IxhEmptyStateCard
 import com.example.ui.components.IxhNeubrutalToggle
+import com.example.ui.components.IxhOrganicModuleBanner
+import com.example.ui.components.IxhOrganicStatTile
+import com.example.ui.components.IxhOrganicWaveDivider
 import com.example.ui.components.IxhPrimaryButton
+import com.example.ui.components.IxhSculptedFilterChip
+import com.example.ui.components.IxhSculptedSectionHeader
 import com.example.ui.components.IxhSecondaryButton
 import com.example.ui.components.IxhSegmentedTabs
 import com.example.ui.components.IxhStatusChip
+import com.example.ui.components.IxhStyledTextField
 import com.example.ui.components.IxhSubScreenTopBar
+import com.example.ui.components.IxhSystemIconType
 import com.example.ui.components.IxhWaBubblePreview
+import com.example.ui.components.ixhOrganicScreenBackdrop
+import com.example.ui.components.neubrutalShadow
 import com.example.ui.theme.IxhBlueBg
 import com.example.ui.theme.IxhBorder
 import com.example.ui.theme.IxhCream
@@ -109,14 +128,15 @@ fun BotPanelScreen(
     onBack: () -> Unit
 ) {
     val isAdmin = activeUser.role == UserRole.ADMIN.name
+    val heroShape = RoundedCornerShape(topStart = 28.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 32.dp)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Panel Bot WhatsApp",
@@ -124,54 +144,200 @@ fun BotPanelScreen(
             rightContent = {
                 IxhStatusChip(
                     text = if (botState.isConnected) "Simulasi Putus" else "Simulasi Hubung",
-                    tone = ChipTone.NEUTRAL,
+                    tone = if (botState.isConnected) ChipTone.NEUTRAL else ChipTone.GREEN,
                     modifier = Modifier.clickable(onClick = onToggleConnectionSimulated)
                 )
             }
         )
 
+        // Hero Telemetry Control Deck
         if (!botState.isConnected) {
-            IxhCard(
-                backgroundColor = IxhRedBg,
-                borderColor = IxhRed,
-                hasHardShadow = true,
-                contentPadding = PaddingValues(16.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .neubrutalShadow(enabled = true, cornerRadius = 22.dp, offsetY = 4.8.dp, offsetX = 3.5.dp)
+                    .clip(heroShape)
+                    .background(IxhRedBg, heroShape)
+                    .drawBehind {
+                        val w = size.width
+                        val h = size.height
+                        val wave = Path().apply {
+                            moveTo(w * 0.45f, 0f)
+                            cubicTo(w * 0.65f, h * 0.30f, w * 0.80f, h * 0.22f, w, h * 0.56f)
+                            lineTo(w, 0f)
+                            close()
+                        }
+                        drawPath(wave, color = IxhRed.copy(alpha = 0.14f))
+                    }
+                    .border(2.6.dp, IxhInk, heroShape)
+                    .padding(16.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IxhBlobMascot(expression = BlobExpression.SAD_ERROR, size = 56.dp)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        IxhStatusChip(text = "BELUM TERHUBUNG", tone = ChipTone.RED)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Bot WhatsApp Terputus",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = IxhInk
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(68.dp)
+                                .neubrutalShadow(enabled = true, cornerRadius = 18.dp, offsetY = 2.5.dp, offsetX = 2.dp)
+                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp))
+                                .background(IxhWhite)
+                                .border(2.2.dp, IxhInk, RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IxhBlobMascot(expression = BlobExpression.SAD_ERROR, size = 56.dp)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            IxhStatusChip(text = "OFFLINE • TERPUTUS", tone = ChipTone.RED)
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                text = "Bot WhatsApp Terputus",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                            Text(
+                                text = "Sesi ${botState.sessionName} • ${botState.activeSince}. Pengiriman otomatis dijeda.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = IxhRed
+                            )
+                        }
+                    }
+                    if (isAdmin) {
+                        IxhPrimaryButton(
+                            text = "Hubungkan Ulang (QR / Kode Pairing)",
+                            icon = Icons.Outlined.QrCode2,
+                            onClick = { onNavigate(AppScreenRoute.BOT_RECONNECT_QR_PAIRING) }
                         )
-                        Text(
-                            text = "Sesi ${botState.sessionName} • ${botState.activeSince}. Semua pengiriman otomatis dijeda.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = IxhRed
+                    } else {
+                        IxhAlertBanner(
+                            text = "Hanya Admin Kelas IX-H yang dapat memindai ulang QR / Kode Pairing sesi Bot.",
+                            tone = ChipTone.YELLOW
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(10.dp))
-                if (isAdmin) {
-                    IxhPrimaryButton(
-                        text = "Hubungkan Ulang (QR / Kode Pairing)",
-                        onClick = { onNavigate(AppScreenRoute.BOT_RECONNECT_QR_PAIRING) }
-                    )
-                } else {
-                    IxhAlertBanner(
-                        text = "Hanya Admin Kelas IX-H yang dapat memindai ulang QR / Kode Pairing sesi Bot.",
-                        tone = ChipTone.YELLOW
-                    )
-                }
             }
         } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .neubrutalShadow(enabled = true, cornerRadius = 24.dp, offsetY = 5.dp, offsetX = 3.5.dp)
+                    .clip(heroShape)
+                    .background(IxhYellow, heroShape)
+                    .drawBehind {
+                        val w = size.width
+                        val h = size.height
+                        val topWave = Path().apply {
+                            moveTo(w * 0.42f, 0f)
+                            cubicTo(w * 0.58f, h * 0.25f, w * 0.78f, h * 0.18f, w, h * 0.50f)
+                            lineTo(w, 0f)
+                            close()
+                        }
+                        drawPath(topWave, color = Color(0xFFFFE47A).copy(alpha = 0.85f))
+                        val bottomWave = Path().apply {
+                            moveTo(0f, h * 0.74f)
+                            cubicTo(w * 0.30f, h * 0.58f, w * 0.65f, h * 0.90f, w, h * 0.66f)
+                            lineTo(w, h)
+                            lineTo(0f, h)
+                            close()
+                        }
+                        drawPath(bottomWave, color = Color(0xFFFFB703).copy(alpha = 0.28f))
+                    }
+                    .border(2.6.dp, IxhInk, heroShape)
+                    .padding(16.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(IxhInk)
+                                .padding(horizontal = 10.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(IxhGreen)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "ONLINE • ${botState.sessionName.uppercase()}",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhYellow
+                            )
+                        }
+                        IxhStatusChip(text = "Aktif ${botState.activeSince}", tone = ChipTone.GREEN)
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = botState.botPhoneNumber,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                            Text(
+                                text = "Gateway WangLinMD aktif siap kirim laporan & tagihan",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = IxhInk.copy(alpha = 0.85f)
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(54.dp)
+                                .neubrutalShadow(enabled = true, cornerRadius = 16.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 20.dp))
+                                .background(IxhCream)
+                                .border(2.2.dp, IxhInk, RoundedCornerShape(topStart = 18.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 20.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IxhDualToneSystemIcon(iconType = IxhSystemIconType.BOT, size = 28.dp)
+                        }
+                    }
+
+                    // Embedded 3-metric telemetry dock
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        BotTelemetryMiniBox(
+                            label = "Nomor Valid",
+                            value = "$validWaCount",
+                            modifier = Modifier.weight(1f)
+                        )
+                        BotTelemetryMiniBox(
+                            label = "Jeda Acak",
+                            value = botState.randomDelayRange,
+                            modifier = Modifier.weight(1f)
+                        )
+                        BotTelemetryMiniBox(
+                            label = "Batas/Jam",
+                            value = "${botState.maxMessagesPerHour} psn",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Pterodactyl VPS Server Deck
+        if (isAdmin) {
+            val isRunning = botState.pterodactylStatus == "Berjalan"
             IxhCard(
-                backgroundColor = IxhYellow,
+                backgroundColor = IxhWhite,
                 hasHardShadow = true,
                 contentPadding = PaddingValues(14.dp)
             ) {
@@ -180,64 +346,34 @@ fun BotPanelScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(IxhGreen)
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        IxhCircleIcon(
+                            icon = Icons.Outlined.PowerSettingsNew,
+                            bgColor = if (isRunning) IxhGreenBg else IxhRedBg,
+                            iconTint = if (isRunning) IxhGreenText else IxhRed,
+                            size = 40.dp
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "TERHUBUNG • ${botState.sessionName}",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = IxhInk
-                        )
-                    }
-                    IxhStatusChip(text = "Aktif sejak ${botState.activeSince}", tone = ChipTone.GREEN)
-                }
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = botState.botPhoneNumber,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = IxhInk
-                )
-                Text(
-                    text = "Jeda acak ${botState.randomDelayRange} • Maks ${botState.maxMessagesPerHour} pesan/jam • $validWaCount nomor valid",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = IxhInk
-                )
-            }
-        }
-
-        if (isAdmin) {
-            IxhCard(backgroundColor = IxhWhite) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "Server Bot (Pterodactyl VPS)",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = IxhInk
-                        )
-                        Text(
-                            text = "Status container: ${botState.pterodactylStatus}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = IxhTextSecondary
-                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "Server VPS (Pterodactyl)",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                            Text(
+                                text = "Node: ${botState.sessionName} • Container ${botState.pterodactylStatus}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = IxhTextSecondary
+                            )
+                        }
                     }
                     IxhStatusChip(
                         text = botState.pterodactylStatus,
-                        tone = if (botState.pterodactylStatus == "Berjalan") ChipTone.GREEN else ChipTone.RED
+                        tone = if (isRunning) ChipTone.GREEN else ChipTone.RED
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     IxhSecondaryButton(
                         text = "Restart Server",
@@ -246,13 +382,11 @@ fun BotPanelScreen(
                         modifier = Modifier.weight(1f)
                     )
                     IxhSecondaryButton(
-                        text = if (botState.pterodactylStatus == "Berhenti") "Start Server" else "Stop Server",
+                        text = if (!isRunning) "Start Server" else "Stop Server",
                         icon = Icons.Outlined.PowerSettingsNew,
-                        isDanger = botState.pterodactylStatus != "Berhenti",
+                        isDanger = isRunning,
                         onClick = {
-                            onPterodactylControl(
-                                if (botState.pterodactylStatus == "Berhenti") "start" else "stop"
-                            )
+                            onPterodactylControl(if (!isRunning) "start" else "stop")
                         },
                         modifier = Modifier.weight(1f)
                     )
@@ -265,59 +399,60 @@ fun BotPanelScreen(
             )
         }
 
-        // Quick Actions Grid
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            IxhPrimaryButton(
-                text = "Kirim Laporan Kelas",
-                icon = Icons.Outlined.Send,
-                onClick = { onNavigate(AppScreenRoute.BOT_SELECT_REPORT) },
-                modifier = Modifier.weight(1f)
-            )
-            IxhSecondaryButton(
-                text = "Template Pesan (6)",
-                onClick = { onNavigate(AppScreenRoute.BOT_TEMPLATES_LIST) },
-                modifier = Modifier.weight(1f)
-            )
+        IxhOrganicWaveDivider()
+        IxhSculptedSectionHeader(title = "Kendali & Aksi Cepat Bot")
+
+        // 2x2 Sculpted Action Bento
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                BotActionBentoTile(
+                    title = "Kirim Laporan",
+                    subtitle = "Tagihan, Kas & Absensi",
+                    icon = Icons.Outlined.Send,
+                    accentBg = IxhYellow,
+                    onClick = { onNavigate(AppScreenRoute.BOT_SELECT_REPORT) },
+                    modifier = Modifier.weight(1f)
+                )
+                BotActionBentoTile(
+                    title = "Template (6)",
+                    subtitle = "Ubah isi & nada WA",
+                    icon = Icons.Outlined.Description,
+                    accentBg = IxhYellowLight,
+                    onClick = { onNavigate(AppScreenRoute.BOT_TEMPLATES_LIST) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                BotActionBentoTile(
+                    title = "Pengaturan Bot",
+                    subtitle = "Anti-spam & tautkan QR",
+                    icon = Icons.Outlined.Settings,
+                    accentBg = IxhBlueBg,
+                    onClick = { onNavigate(AppScreenRoute.BOT_SETTINGS_ADMIN) },
+                    modifier = Modifier.weight(1f)
+                )
+                BotActionBentoTile(
+                    title = "Alur STOP/MULAI",
+                    subtitle = "Simulasi opt-out siswa",
+                    icon = Icons.Outlined.StopCircle,
+                    accentBg = IxhGreenBg,
+                    onClick = { onNavigate(AppScreenRoute.BOT_STOP_MULAI_SIMULATOR) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            IxhSecondaryButton(
-                text = "Pengaturan Bot",
-                onClick = { onNavigate(AppScreenRoute.BOT_SETTINGS_ADMIN) },
-                modifier = Modifier.weight(1f)
-            )
-            IxhSecondaryButton(
-                text = "Alur STOP/MULAI",
-                onClick = { onNavigate(AppScreenRoute.BOT_STOP_MULAI_SIMULATOR) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Riwayat Pengiriman Terakhir",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = IxhInk
-            )
-            Text(
-                text = "Lihat Semua →",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = IxhTextSecondary,
-                modifier = Modifier.clickable { onNavigate(AppScreenRoute.BOT_HISTORY) }
-            )
-        }
+        IxhSculptedSectionHeader(
+            title = "Riwayat Pengiriman Terakhir",
+            actionLabel = "Lihat Semua →",
+            onActionClick = { onNavigate(AppScreenRoute.BOT_HISTORY) }
+        )
 
         if (dispatchLogs.isEmpty()) {
             IxhEmptyStateCard(
@@ -327,13 +462,14 @@ fun BotPanelScreen(
             )
         } else {
             dispatchLogs.take(4).forEach { log ->
-                val tone = when {
-                    log.failedCount > 0 && log.sentCount == 0 -> ChipTone.RED
-                    log.failedCount > 0 -> ChipTone.YELLOW
-                    else -> ChipTone.GREEN
+                val (tone, stripeCol) = when {
+                    log.failedCount > 0 && log.sentCount == 0 -> ChipTone.RED to IxhRed
+                    log.failedCount > 0 -> ChipTone.YELLOW to IxhYellow
+                    else -> ChipTone.GREEN to IxhGreen
                 }
                 IxhCard(
                     backgroundColor = IxhWhite,
+                    leftStripeColor = stripeCol,
                     onClick = {
                         if (log.failedCount > 0) {
                             onNavigate(AppScreenRoute.BOT_FAILURE_LOGS)
@@ -351,7 +487,7 @@ fun BotPanelScreen(
                             Text(
                                 text = log.title,
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 color = IxhInk
                             )
                             Text(
@@ -360,10 +496,100 @@ fun BotPanelScreen(
                                 color = IxhTextSecondary
                             )
                         }
+                        Spacer(modifier = Modifier.width(8.dp))
                         IxhStatusChip(text = log.statusLabel, tone = tone)
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BotTelemetryMiniBox(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(topStart = 14.dp, topEnd = 8.dp, bottomStart = 8.dp, bottomEnd = 16.dp)
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(IxhWhite, shape)
+            .border(2.dp, IxhInk, shape)
+            .padding(horizontal = 8.dp, vertical = 7.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = IxhInk,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = label.uppercase(),
+            fontSize = 8.5.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = IxhTextSecondary,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun BotActionBentoTile(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    accentBg: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tileShape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp)
+    Column(
+        modifier = modifier
+            .neubrutalShadow(enabled = true, cornerRadius = 16.dp, offsetY = 3.5.dp, offsetX = 2.5.dp)
+            .clip(tileShape)
+            .background(IxhWhite, tileShape)
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                val wave = Path().apply {
+                    moveTo(w * 0.48f, 0f)
+                    cubicTo(w * 0.65f, h * 0.25f, w * 0.80f, h * 0.20f, w, h * 0.45f)
+                    lineTo(w, 0f)
+                    close()
+                }
+                drawPath(wave, color = accentBg.copy(alpha = 0.72f))
+            }
+            .border(2.2.dp, IxhInk, tileShape)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        IxhCircleIcon(
+            icon = icon,
+            bgColor = accentBg,
+            size = 36.dp
+        )
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = IxhTextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -385,18 +611,27 @@ fun BotSelectReportScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Pilih Jenis Laporan", onBack = onBack)
 
-        reportTypes.forEachIndexed { idx, (title, sub, _) ->
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Langkah 1 dari 2",
+            title = "Kirim Laporan Kelas",
+            subtitle = "Pilih jenis rekap otomatis yang akan diformat ke pesan WhatsApp.",
+            iconType = IxhSystemIconType.BOT
+        )
+
+        reportTypes.forEachIndexed { idx, (title, sub, cat) ->
             val selected = idx == selectedIdx
             IxhCard(
                 backgroundColor = if (selected) IxhYellowLight else IxhWhite,
-                borderColor = if (selected) IxhInk else null,
+                borderColor = IxhInk,
                 hasHardShadow = selected,
+                leftStripeColor = if (selected) IxhYellow else IxhSurfaceMuted,
                 onClick = { selectedIdx = idx }
             ) {
                 Row(
@@ -404,21 +639,43 @@ fun BotSelectReportScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = IxhInk
-                        )
-                        Text(
-                            text = sub,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = IxhTextSecondary
-                        )
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (selected) IxhYellow else IxhSurfaceMuted)
+                                .border(2.dp, IxhInk, RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${idx + 1}",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                            Text(
+                                text = sub,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = IxhTextSecondary
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                     IxhStatusChip(
-                        text = if (selected) "Dipilih ✓" else "Pilih",
+                        text = if (selected) "Dipilih ✓" else cat,
                         tone = if (selected) ChipTone.OUTLINE_YELLOW else ChipTone.NEUTRAL
                     )
                 }
@@ -446,23 +703,35 @@ fun BotConfigureSendScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Atur & Kirim Pesan", onBack = onBack)
 
-        Text(
-            text = "TUJUAN PENERIMA",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Langkah 2 dari 2",
+            title = "Pratinjau & Siapkan Antrean",
+            subtitle = "Validasi target penerima sebelum pesan masuk antrean jeda acak.",
+            iconType = IxhSystemIconType.BOT,
+            trailingContent = {
+                IxhOrganicStatTile(
+                    label = "Target",
+                    value = "${targetCounts[recipientOption]}",
+                    accentColor = IxhGreenBg
+                )
+            }
         )
+
+        IxhSculptedSectionHeader(title = "Tujuan Penerima")
         IxhSegmentedTabs(
-            tabs = listOf("Nomor Valid ($validCount)", "Belum Lunas ($unpaidCount)", "Grup IX-H"),
+            tabs = listOf("Valid ($validCount)", "Belum Lunas ($unpaidCount)", "Grup IX-H"),
             selectedIndex = recipientOption,
             onTabSelected = { recipientOption = it }
         )
 
+        IxhSculptedSectionHeader(title = "Pratinjau Pesan WhatsApp")
         IxhWaBubblePreview(
             senderTitle = "IX-H Hub • Laporan Kelas",
             messageBody = "Halo *Siswa IX-H*,\nBerikut rekap harian Kelas IX-H hari ini:\n• Kehadiran & Kas tercatat di aplikasi\n• Periksa jadwal dan tugas besok di IX-H Hub\n\nBalas STOP untuk berhenti menerima pesan.",
@@ -476,6 +745,7 @@ fun BotConfigureSendScreen(
 
         IxhPrimaryButton(
             text = "Kirim Sekarang (${targetCounts[recipientOption]} Penerima)",
+            icon = Icons.Outlined.Send,
             onClick = {
                 onDispatchNow(
                     "Rekap Harian & Tagihan Kelas IX-H",
@@ -499,33 +769,64 @@ fun BotHistoryScreen(
     val filtered = dispatchLogs.filter {
         if (filterIdx == 0) true else it.category.equals(cats[filterIdx], ignoreCase = true)
     }
+    val totalSent = dispatchLogs.sumOf { it.sentCount }
+    val totalFailed = dispatchLogs.sumOf { it.failedCount }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Riwayat Pengiriman Bot", onBack = onBack)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Log Broadcast",
+            title = "Riwayat Pengiriman",
+            subtitle = "Pantau laporan pesan terkirim dan gagal secara langsung.",
+            iconType = IxhSystemIconType.BOT
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IxhOrganicStatTile(
+                label = "Total Batch",
+                value = "${dispatchLogs.size}",
+                accentColor = IxhYellowLight,
+                modifier = Modifier.weight(1f)
+            )
+            IxhOrganicStatTile(
+                label = "Terkirim",
+                value = "$totalSent",
+                accentColor = IxhGreenBg,
+                valueColor = IxhGreenText,
+                modifier = Modifier.weight(1f)
+            )
+            IxhOrganicStatTile(
+                label = "Gagal",
+                value = "$totalFailed",
+                accentColor = IxhRedBg,
+                valueColor = IxhRed,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             cats.forEachIndexed { idx, label ->
-                val sel = idx == filterIdx
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (sel) IxhInk else IxhSurfaceMuted)
-                        .clickable { filterIdx = idx }
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = label,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (sel) IxhWhite else IxhTextSecondary
-                    )
-                }
+                IxhSculptedFilterChip(
+                    label = label,
+                    selected = idx == filterIdx,
+                    onClick = { filterIdx = idx }
+                )
             }
         }
 
@@ -537,13 +838,14 @@ fun BotHistoryScreen(
             )
         } else {
             filtered.forEach { log ->
-                val tone = when {
-                    log.failedCount > 0 && log.sentCount == 0 -> ChipTone.RED
-                    log.failedCount > 0 -> ChipTone.YELLOW
-                    else -> ChipTone.GREEN
+                val (tone, stripe) = when {
+                    log.failedCount > 0 && log.sentCount == 0 -> ChipTone.RED to IxhRed
+                    log.failedCount > 0 -> ChipTone.YELLOW to IxhYellow
+                    else -> ChipTone.GREEN to IxhGreen
                 }
                 IxhCard(
                     backgroundColor = IxhWhite,
+                    leftStripeColor = stripe,
                     onClick = { if (log.failedCount > 0) onOpenFailureLogs() }
                 ) {
                     Row(
@@ -555,7 +857,7 @@ fun BotHistoryScreen(
                             Text(
                                 text = log.title,
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 color = IxhInk
                             )
                             Text(
@@ -564,13 +866,16 @@ fun BotHistoryScreen(
                                 color = IxhTextSecondary
                             )
                             if (log.failureReason.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "Catatan: ${log.failureReason}",
                                     style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
                                     color = IxhRed
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.width(8.dp))
                         IxhStatusChip(text = log.statusLabel, tone = tone)
                     }
                 }
@@ -596,32 +901,36 @@ fun BotSettingsAdminScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Pengaturan Bot (Admin)", onBack = onBack)
 
         IxhCard(
-            backgroundColor = IxhYellowLight,
-            borderColor = IxhInk
+            backgroundColor = IxhYellow,
+            borderColor = IxhInk,
+            hasHardShadow = true,
+            contentPadding = PaddingValues(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Sesi ${botState.sessionName}",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
                         text = "${botState.botPhoneNumber} • ${botState.activeSince}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = IxhTextSecondary
+                        fontWeight = FontWeight.Bold,
+                        color = IxhInk.copy(alpha = 0.85f)
                     )
                 }
                 IxhStatusChip(
@@ -629,20 +938,20 @@ fun BotSettingsAdminScreen(
                     tone = if (botState.isConnected) ChipTone.GREEN else ChipTone.RED
                 )
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            IxhPrimaryButton(
+            Spacer(modifier = Modifier.height(12.dp))
+            IxhSecondaryButton(
                 text = "Tautkan Ulang QR / Kode Pairing",
+                icon = Icons.Outlined.QrCode2,
                 onClick = onNavigateReconnect
             )
         }
 
-        IxhCard(backgroundColor = IxhWhite) {
-            Text(
-                text = "KEAMANAN & ANTI-BLOKIR WHATSAPP",
-                style = MaterialTheme.typography.labelSmall,
-                color = IxhTextSecondary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+        IxhSculptedSectionHeader(title = "Keamanan & Anti-Blokir WhatsApp")
+
+        IxhCard(
+            backgroundColor = IxhWhite,
+            hasHardShadow = true
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -652,7 +961,7 @@ fun BotSettingsAdminScreen(
                     Text(
                         text = "Batas Pesan per Jam",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
@@ -667,42 +976,71 @@ fun BotSettingsAdminScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(30.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .size(34.dp)
+                            .neubrutalShadow(enabled = true, cornerRadius = 10.dp, offsetY = 2.dp, offsetX = 1.5.dp)
+                            .clip(RoundedCornerShape(10.dp))
                             .background(IxhSurfaceMuted)
+                            .border(2.dp, IxhInk, RoundedCornerShape(10.dp))
                             .clickable { onUpdateMaxPerHour(-10) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("-", fontWeight = FontWeight.ExtraBold, color = IxhInk)
+                        Text("-", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                     }
-                    Text(
-                        text = "${botState.maxMessagesPerHour}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = IxhInk
-                    )
                     Box(
                         modifier = Modifier
-                            .size(30.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(IxhYellowLight)
+                            .border(2.dp, IxhInk, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 12.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = "${botState.maxMessagesPerHour}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhInk
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .neubrutalShadow(enabled = true, cornerRadius = 10.dp, offsetY = 2.dp, offsetX = 1.5.dp)
+                            .clip(RoundedCornerShape(10.dp))
                             .background(IxhYellow)
-                            .border(1.dp, IxhInk, RoundedCornerShape(8.dp))
+                            .border(2.dp, IxhInk, RoundedCornerShape(10.dp))
                             .clickable { onUpdateMaxPerHour(10) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("+", fontWeight = FontWeight.ExtraBold, color = IxhInk)
+                        Text("+", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            // Visual rate limit bar
+            val ratio = (botState.maxMessagesPerHour / 100f).coerceIn(0.1f, 1f)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(IxhSurfaceMuted)
+                    .border(1.8.dp, IxhInk, RoundedCornerShape(999.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(ratio)
+                        .height(12.dp)
+                        .background(if (botState.maxMessagesPerHour <= 60) IxhGreen else IxhYellow)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("Jeda Acak Antar Pesan", style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)
-                Text("8–20 detik (Terkunci Aman)", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = IxhGreenText)
+                Text("8–20 detik (Terkunci Aman)", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold, color = IxhGreenText)
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -711,7 +1049,9 @@ fun BotSettingsAdminScreen(
                 Text(
                     text = "Jeda otomatis saat koneksi terputus",
                     style = MaterialTheme.typography.bodySmall,
-                    color = IxhInk
+                    fontWeight = FontWeight.SemiBold,
+                    color = IxhInk,
+                    modifier = Modifier.weight(1f)
                 )
                 IxhNeubrutalToggle(checked = autoPause, onCheckedChange = { autoPause = it })
             }
@@ -719,6 +1059,7 @@ fun BotSettingsAdminScreen(
 
         IxhCard(
             backgroundColor = IxhWhite,
+            leftStripeColor = if (problemCount > 0) IxhRed else IxhGreen,
             onClick = onNavigateProblematicNumbers
         ) {
             Row(
@@ -726,11 +1067,11 @@ fun BotSettingsAdminScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Status Nomor WA Siswa",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
@@ -762,11 +1103,19 @@ fun BotReconnectQrPairingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Tautkan Perangkat WA", onBack = onBack)
+
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Sinkronisasi Perangkat",
+            title = "Tautkan Sesi ${botState.sessionName}",
+            subtitle = "Pilih pairing 8 digit atau pindai kode QR lewat WhatsApp resmi.",
+            iconType = IxhSystemIconType.BOT
+        )
 
         IxhSegmentedTabs(
             tabs = listOf("Kode Pairing (8 Digit)", "Pindai Kode QR"),
@@ -779,7 +1128,7 @@ fun BotReconnectQrPairingScreen(
                 backgroundColor = IxhYellowLight,
                 borderColor = IxhInk,
                 hasHardShadow = true,
-                contentPadding = PaddingValues(16.dp)
+                contentPadding = PaddingValues(18.dp)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -788,9 +1137,10 @@ fun BotReconnectQrPairingScreen(
                     Text(
                         text = "KODE PAIRING WHATSAPP",
                         style = MaterialTheme.typography.labelSmall,
-                        color = IxhTextSecondary
+                        fontWeight = FontWeight.ExtraBold,
+                        color = IxhInk
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         botState.pairingCode.forEachIndexed { idx, ch ->
                             if (idx == 4) {
@@ -799,30 +1149,32 @@ fun BotReconnectQrPairingScreen(
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = IxhInk,
-                                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp)
+                                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 6.dp)
                                 )
                             }
                             Box(
                                 modifier = Modifier
-                                    .size(width = 30.dp, height = 38.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .size(width = 30.dp, height = 42.dp)
+                                    .neubrutalShadow(enabled = true, cornerRadius = 8.dp, offsetY = 2.2.dp, offsetX = 1.6.dp)
+                                    .clip(RoundedCornerShape(9.dp))
                                     .background(IxhWhite)
-                                    .border(1.5.dp, IxhInk, RoundedCornerShape(8.dp)),
+                                    .border(2.2.dp, IxhInk, RoundedCornerShape(9.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = ch.toString(),
-                                    fontSize = 16.sp,
+                                    fontSize = 17.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = IxhInk
                                 )
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Buka WhatsApp → Perangkat Tertaut → Tautkan dengan nomor telepon saja.",
                         style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = IxhInk,
                         textAlign = TextAlign.Center
                     )
@@ -837,39 +1189,44 @@ fun BotReconnectQrPairingScreen(
             IxhCard(
                 backgroundColor = IxhWhite,
                 hasHardShadow = true,
-                contentPadding = PaddingValues(16.dp)
+                contentPadding = PaddingValues(18.dp)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Canvas(
+                    Box(
                         modifier = Modifier
-                            .size(160.dp)
-                            .border(2.dp, IxhInk, RoundedCornerShape(12.dp))
-                            .padding(12.dp)
+                            .neubrutalShadow(enabled = true, cornerRadius = 16.dp, offsetY = 3.5.dp, offsetX = 2.5.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(IxhCream)
+                            .border(2.6.dp, IxhInk, RoundedCornerShape(16.dp))
+                            .padding(14.dp)
                     ) {
-                        val grid = 9
-                        val cell = size.width / grid
-                        for (r in 0 until grid) {
-                            for (c in 0 until grid) {
-                                val isCorner = (r < 3 && c < 3) || (r < 3 && c >= grid - 3) || (r >= grid - 3 && c < 3)
-                                val fill = isCorner || ((r * 7 + c * 3) % 2 == 0)
-                                if (fill) {
-                                    drawRect(
-                                        color = IxhInk,
-                                        topLeft = Offset(c * cell, r * cell),
-                                        size = Size(cell * 0.85f, cell * 0.85f)
-                                    )
+                        Canvas(modifier = Modifier.size(156.dp)) {
+                            val grid = 9
+                            val cell = size.width / grid
+                            for (r in 0 until grid) {
+                                for (c in 0 until grid) {
+                                    val isCorner = (r < 3 && c < 3) || (r < 3 && c >= grid - 3) || (r >= grid - 3 && c < 3)
+                                    val fill = isCorner || ((r * 7 + c * 3) % 2 == 0)
+                                    if (fill) {
+                                        drawRect(
+                                            color = IxhInk,
+                                            topLeft = Offset(c * cell, r * cell),
+                                            size = Size(cell * 0.86f, cell * 0.86f)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Pindai QR ini dari WhatsApp nomor Bot (${botState.botPhoneNumber})",
                         style = MaterialTheme.typography.bodySmall,
-                        color = IxhTextSecondary,
+                        fontWeight = FontWeight.Bold,
+                        color = IxhInk,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -895,11 +1252,21 @@ fun BotFailureLogsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Log Kegagalan Bot", onBack = onBack)
+
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Diagnostik Kirim",
+            title = "Pantau Kegagalan Bot",
+            subtitle = "Periksa nomor tidak valid atau timeout untuk kirim ulang.",
+            iconType = IxhSystemIconType.BOT,
+            containerColor = if (failedLogs.isEmpty()) IxhGreenBg else IxhRedBg,
+            accentWaveColor = if (failedLogs.isEmpty()) IxhGreen else IxhRed
+        )
 
         if (failedLogs.isEmpty()) {
             IxhEmptyStateCard(
@@ -921,14 +1288,17 @@ fun BotFailureLogsScreen(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = log.title,
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = IxhInk
+                            fontWeight = FontWeight.ExtraBold,
+                            color = IxhInk,
+                            modifier = Modifier.weight(1f)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         IxhStatusChip(text = "${log.failedCount} gagal", tone = ChipTone.RED)
                     }
                     Text(
@@ -941,6 +1311,7 @@ fun BotFailureLogsScreen(
                         Text(
                             text = "Penyebab: ${log.failureReason}",
                             style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
                             color = IxhRed
                         )
                     }
@@ -973,20 +1344,29 @@ fun BotTemplatesListScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Template Pesan WA", onBack = onBack)
+
+        IxhOrganicModuleBanner(
+            eyebrowTag = "6 Template Aktif",
+            title = "Template Pesan Bot",
+            subtitle = "Sesuaikan format pesan otomatis dengan placeholder dinamis.",
+            iconType = IxhSystemIconType.BOT
+        )
 
         IxhAlertBanner(
             text = "Variabel resmi: {nama}, {nominal}, {jatuh_tempo}. Baris 'Balas STOP' dikunci otomatis demi kepatuhan anti-spam.",
             tone = ChipTone.BLUE
         )
 
-        templates.forEach { tpl ->
+        templates.forEachIndexed { idx, tpl ->
             IxhCard(
                 backgroundColor = IxhWhite,
+                leftStripeColor = if (tpl.isModified) IxhYellow else IxhGreen,
                 onClick = { onOpenEditor(tpl) }
             ) {
                 Row(
@@ -994,19 +1374,41 @@ fun BotTemplatesListScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = tpl.name,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = IxhInk
-                        )
-                        Text(
-                            text = tpl.subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = IxhTextSecondary
-                        )
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(IxhYellowLight)
+                                .border(1.8.dp, IxhInk, RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${idx + 1}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = tpl.name,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                            Text(
+                                text = tpl.subtitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = IxhTextSecondary
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                     IxhStatusChip(
                         text = if (tpl.isModified) "Diubah" else "Bawaan",
                         tone = if (tpl.isModified) ChipTone.YELLOW else ChipTone.GREEN
@@ -1043,25 +1445,22 @@ fun BotTemplateEditorScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Edit Template WA", onBack = onBack)
 
-        Text(
-            text = item.name,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
-            color = IxhInk
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Editor Pesan",
+            title = item.name,
+            subtitle = item.subtitle,
+            iconType = IxhSystemIconType.BOT
         )
 
         if (item.id == "pengingat_kas") {
-            Text(
-                text = "NADA PENGINGAT (RAMAH / BIASA / TEGAS)",
-                style = MaterialTheme.typography.labelSmall,
-                color = IxhTextSecondary
-            )
+            IxhSculptedSectionHeader(title = "Nada Pengingat")
             IxhSegmentedTabs(
                 tabs = listOf("Ramah", "Biasa", "Tegas"),
                 selectedIndex = toneIdx,
@@ -1076,47 +1475,33 @@ fun BotTemplateEditorScreen(
             )
         }
 
-        Text(
-            text = "SISIPKAN VARIABEL CEPAT",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        IxhSculptedSectionHeader(title = "Sisipkan Variabel Cepat")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("{nama}", "{nominal}", "{jatuh_tempo}").forEach { token ->
-                IxhStatusChip(
-                    text = "+ $token",
-                    tone = ChipTone.OUTLINE_YELLOW,
-                    modifier = Modifier.clickable {
-                        bodyText = "$bodyText $token"
-                    }
+                IxhSculptedFilterChip(
+                    label = "+ $token",
+                    selected = false,
+                    onClick = { bodyText = "$bodyText $token" }
                 )
             }
         }
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = bodyText,
             onValueChange = {
                 bodyText = it
                 errorMessage = null
             },
-            label = { Text("Isi Template Pesan") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 4,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            label = "Isi Template Pesan",
+            singleLine = false,
+            minLines = 4
         )
 
         if (errorMessage != null) {
             IxhAlertBanner(text = errorMessage!!, tone = ChipTone.RED)
         }
 
-        Text(
-            text = "PRATINJAU PESAN WHATSAPP",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "Pratinjau Pesan WhatsApp")
         IxhWaBubblePreview(
             senderTitle = "IX-H Hub • ${item.name}",
             messageBody = renderedPreview,
@@ -1162,47 +1547,55 @@ fun BotStopMulaiSimulatorScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Alur STOP & MULAI WA", onBack = onBack)
+
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Kepatuhan Opt-Out",
+            title = "Kendali STOP & MULAI",
+            subtitle = "Simulasikan dan pantau status persetujuan WhatsApp siswa.",
+            iconType = IxhSystemIconType.BOT
+        )
 
         IxhAlertBanner(
             text = "Siswa dapat membalas STOP kapan saja di WhatsApp untuk menghentikan pesan otomatis, atau MULAI untuk mengaktifkan kembali.",
             tone = ChipTone.BLUE
         )
 
-        Text(
-            text = "1. SAAT SISWA MEMBALAS 'STOP'",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhSculptedSectionHeader(title = "1. Saat Siswa Membalas 'STOP'")
         IxhWaBubblePreview(
             senderTitle = "IX-H Hub",
             messageBody = "Halo *${sampleStudent?.fullName ?: "Siswa IX-H"}*, tagihan Kas Mingguan sebesar Rp6.000 telah diterbitkan.\nBalas STOP untuk berhenti.",
             timeLabel = "19.38",
             outgoingReply = "STOP"
         )
-        IxhCard(backgroundColor = IxhGreenBg, borderColor = IxhGreen) {
+        IxhCard(
+            backgroundColor = IxhGreenBg,
+            borderColor = IxhInk,
+            leftStripeColor = IxhGreen
+        ) {
             Text(
-                text = "Balasan Otomatis Bot:",
+                text = "BALASAN OTOMATIS BOT",
                 style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 color = IxhGreenText
             )
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = "[OK] Nomor kamu telah dihentikan dari pengiriman pesan otomatis IX-H Hub. Ketik *MULAI* kapan saja jika ingin menerima pengingat lagi.",
                 style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
                 color = IxhInk
             )
         }
 
-        Text(
-            text = "2. KENDALI LANGSUNG DI APLIKASI",
-            style = MaterialTheme.typography.labelSmall,
-            color = IxhTextSecondary
-        )
+        IxhOrganicWaveDivider()
+        IxhSculptedSectionHeader(title = "2. Kendali Langsung di Aplikasi")
+
         if (sampleStudent == null) {
             IxhEmptyStateCard(
                 title = "Belum ada akun siswa terdaftar.",
@@ -1210,7 +1603,10 @@ fun BotStopMulaiSimulatorScreen(
                 mascotState = BlobMascotState.IDLE
             )
         } else {
-            IxhCard(backgroundColor = IxhWhite) {
+            IxhCard(
+                backgroundColor = IxhWhite,
+                hasHardShadow = true
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1220,7 +1616,7 @@ fun BotStopMulaiSimulatorScreen(
                         Text(
                             text = sampleStudent.fullName,
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = IxhInk
                         )
                         Text(
@@ -1234,7 +1630,7 @@ fun BotStopMulaiSimulatorScreen(
                         tone = if (isCurrentlyStopped) ChipTone.RED else ChipTone.GREEN
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 IxhPrimaryButton(
                     text = if (isCurrentlyStopped) "Simulasikan Ketik MULAI (Aktifkan Lagi)" else "Simulasikan Ketik STOP (Hentikan)",
                     onClick = { onToggleStudentStopMulai(sampleStudent, isCurrentlyStopped) }
@@ -1280,9 +1676,10 @@ fun UserManagementListScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Manajemen Pengguna",
@@ -1296,6 +1693,38 @@ fun UserManagementListScreen(
             }
         )
 
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Direktori Kelas IX-H",
+            title = "Kelola Anggota & Role",
+            subtitle = "Atur akun siswa, pengurus kelas, dan validasi nomor WhatsApp.",
+            iconType = IxhSystemIconType.PROFIL
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IxhOrganicStatTile(
+                label = "Total Akun",
+                value = "${users.size}",
+                accentColor = IxhYellowLight,
+                modifier = Modifier.weight(1f)
+            )
+            IxhOrganicStatTile(
+                label = "Pengurus",
+                value = "$pengurusCount",
+                accentColor = IxhBlueBg,
+                modifier = Modifier.weight(1f)
+            )
+            IxhOrganicStatTile(
+                label = "WA Cek",
+                value = "$problematicCount",
+                accentColor = if (problematicCount > 0) IxhRedBg else IxhGreenBg,
+                valueColor = if (problematicCount > 0) IxhRed else IxhGreenText,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
         if (problematicCount > 0) {
             IxhAlertBanner(
                 title = "$problematicCount nomor WA perlu diperiksa",
@@ -1305,20 +1734,15 @@ fun UserManagementListScreen(
             )
         }
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Cari nama siswa atau username...") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = IxhWhite,
-                unfocusedContainerColor = IxhWhite
-            )
+            placeholder = "Cari nama siswa atau username...",
+            leadingIcon = Icons.Outlined.Search
         )
 
         IxhSegmentedTabs(
-            tabs = listOf("Semua (${users.size})", "Pengurus ($pengurusCount)", "Siswa ($siswaCount)", "Bermasalah ($problematicCount)"),
+            tabs = listOf("Semua (${users.size})", "Pengurus ($pengurusCount)", "Siswa ($siswaCount)", "Cek ($problematicCount)"),
             selectedIndex = filterTab,
             onTabSelected = { filterTab = it }
         )
@@ -1353,8 +1777,9 @@ fun UserManagementListScreen(
                 }
                 IxhCard(
                     backgroundColor = IxhWhite,
+                    leftStripeColor = if (user.role == UserRole.SISWA.name) IxhYellowLight else IxhYellow,
                     onClick = { onOpenUserDetail(user) },
-                    contentPadding = PaddingValues(10.dp)
+                    contentPadding = PaddingValues(12.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -1362,15 +1787,16 @@ fun UserManagementListScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
+                                .size(38.dp)
+                                .neubrutalShadow(enabled = true, cornerRadius = 12.dp, offsetY = 2.dp, offsetX = 1.5.dp)
+                                .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 15.dp))
                                 .background(if (user.role == UserRole.ADMIN.name) IxhYellow else IxhYellowLight)
-                                .border(1.5.dp, IxhInk, CircleShape),
+                                .border(2.dp, IxhInk, RoundedCornerShape(topStart = 14.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 15.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "%02d".format(user.absenNo),
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = IxhInk
                             )
@@ -1384,20 +1810,26 @@ fun UserManagementListScreen(
                                 Text(
                                     text = user.fullName,
                                     style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = IxhInk
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = IxhInk,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 )
                                 IxhStatusChip(
-                                    text = if (user.subRoleTitle.isNotBlank()) "${user.role} • ${user.subRoleTitle}" else user.role,
+                                    text = if (user.subRoleTitle.isNotBlank()) user.subRoleTitle else user.role,
                                     tone = if (user.role == UserRole.SISWA.name) ChipTone.NEUTRAL else ChipTone.OUTLINE_YELLOW
                                 )
                             }
                             Text(
                                 text = "@${user.username} • ${user.phoneWa}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = IxhTextSecondary
+                                color = IxhTextSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
+                        Spacer(modifier = Modifier.width(6.dp))
                         IxhStatusChip(text = waLabel, tone = waTone)
                     }
                 }
@@ -1421,9 +1853,10 @@ fun UserDetailAdminScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Detail Pengguna", onBack = onBack)
 
@@ -1435,43 +1868,72 @@ fun UserDetailAdminScreen(
             )
         } else {
             IxhCard(
-                backgroundColor = IxhYellowLight,
+                backgroundColor = IxhYellow,
                 borderColor = IxhInk,
-                hasHardShadow = true
+                hasHardShadow = true,
+                contentPadding = PaddingValues(16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = user.fullName,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = IxhInk
-                        )
-                        Text(
-                            text = "@${user.username} • Absen No. ${"%02d".format(user.absenNo)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = IxhTextSecondary
-                        )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .neubrutalShadow(enabled = true, cornerRadius = 14.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 18.dp))
+                                .background(IxhCream)
+                                .border(2.2.dp, IxhInk, RoundedCornerShape(topStart = 16.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 18.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "%02d".format(user.absenNo),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = user.fullName,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = IxhInk
+                            )
+                            Text(
+                                text = "@${user.username} • Absen ${"%02d".format(user.absenNo)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = IxhInk.copy(alpha = 0.8f)
+                            )
+                        }
                     }
-                    IxhStatusChip(text = user.role, tone = ChipTone.OUTLINE_YELLOW)
+                    IxhStatusChip(text = user.role, tone = ChipTone.NEUTRAL)
                 }
             }
 
             IxhCard(backgroundColor = IxhWhite) {
-                Text("INFORMASI KONTAK & WHATSAPP", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
-                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "INFORMASI KONTAK & WHATSAPP",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = IxhInk
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("Nomor WhatsApp", style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)
-                    Text(user.phoneWa, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = IxhInk)
+                    Text(user.phoneWa, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1488,24 +1950,27 @@ fun UserDetailAdminScreen(
             if (generatedTempPass != null) {
                 IxhCard(
                     backgroundColor = IxhGreenBg,
-                    borderColor = IxhGreen
+                    borderColor = IxhInk,
+                    hasHardShadow = true,
+                    leftStripeColor = IxhGreen
                 ) {
                     Text(
                         text = "PASSWORD SEMENTARA BERHASIL DIBUAT",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = IxhGreenText
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = generatedTempPass!!,
-                        fontSize = 22.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
                     Text(
                         text = "Pengguna wajib mengganti password saat login pertama kali.",
                         style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = IxhInk
                     )
                 }
@@ -1551,13 +2016,14 @@ fun UserDetailAdminScreen(
                     ).forEach { (rName, sub, desc) ->
                         IxhCard(
                             backgroundColor = if (user.role == rName) IxhYellowLight else IxhSurfaceMuted,
-                            borderColor = if (user.role == rName) IxhInk else IxhBorder,
+                            borderColor = IxhInk,
+                            hasHardShadow = user.role == rName,
                             onClick = {
                                 onUpdateRole(user, rName, sub)
                                 showRoleDialog = false
                             }
                         ) {
-                            Text(rName, fontWeight = FontWeight.Bold, color = IxhInk)
+                            Text(rName, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                             Text(desc, style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)
                         }
                     }
@@ -1565,7 +2031,7 @@ fun UserDetailAdminScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showRoleDialog = false }) {
-                    Text("Tutup", color = IxhInk, fontWeight = FontWeight.Bold)
+                    Text("Tutup", color = IxhInk, fontWeight = FontWeight.ExtraBold)
                 }
             }
         )
@@ -1587,13 +2053,21 @@ fun UserFormAdminScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Tambah Pengguna Baru", onBack = onBack)
 
-        OutlinedTextField(
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Akun Kelas IX-H",
+            title = "Registrasi Pengguna",
+            subtitle = "Password sementara dibuat otomatis untuk onboarding awal.",
+            iconType = IxhSystemIconType.PROFIL
+        )
+
+        IxhStyledTextField(
             value = fullName,
             onValueChange = {
                 fullName = it
@@ -1601,35 +2075,31 @@ fun UserFormAdminScreen(
                     username = it.lowercase().trim().replace(" ", ".")
                 }
             },
-            label = { Text("Nama Lengkap Siswa") },
-            modifier = Modifier.fillMaxWidth().testTag("user_form_name_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Nama Lengkap Siswa",
+            placeholder = "Contoh: Andi Pratama",
+            testTag = "user_form_name_input"
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Username Login") },
-            modifier = Modifier.fillMaxWidth().testTag("user_form_username_input"),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Username Login",
+            placeholder = "Contoh: andi.pratama",
+            testTag = "user_form_username_input"
         )
 
-        Text("PILIH ROLE", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
+        IxhSculptedSectionHeader(title = "Pilih Role Akun")
         IxhSegmentedTabs(
             tabs = roles,
             selectedIndex = roleIndex,
             onTabSelected = { roleIndex = it }
         )
 
-        OutlinedTextField(
+        IxhStyledTextField(
             value = phoneWa,
             onValueChange = { phoneWa = it },
-            label = { Text("Nomor WhatsApp (Otomatis diformat +62)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = IxhWhite, unfocusedContainerColor = IxhWhite)
+            label = "Nomor WhatsApp (Otomatis +62)",
+            placeholder = "081234567890"
         )
 
         IxhPrimaryButton(
@@ -1661,25 +2131,34 @@ fun UserImportMassalScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Impor Massal (CSV/Excel)", onBack = onBack)
 
-        IxhCard(backgroundColor = IxhWhite) {
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Impor Data Massal",
+            title = "Impor Daftar Siswa",
+            subtitle = "Tambahkan seluruh daftar kelas IX-H sekali klik dengan format CSV.",
+            iconType = IxhSystemIconType.PROFIL
+        )
+
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
             Text(
                 text = "LANGKAH 1: UNDUH FORMAT TEMPLATE",
                 style = MaterialTheme.typography.labelSmall,
-                color = IxhTextSecondary
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "Gunakan format kolom: No_Absen, Nama_Lengkap, Username, Nomor_WA, Role",
                 style = MaterialTheme.typography.bodySmall,
                 color = IxhInk
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             IxhSecondaryButton(
                 text = "Unduh Template_Siswa_IXH.csv",
                 icon = Icons.Outlined.Download,
@@ -1690,27 +2169,28 @@ fun UserImportMassalScreen(
         IxhCard(
             backgroundColor = IxhYellowLight,
             borderColor = IxhInk,
+            hasHardShadow = true,
             onClick = { onImportCompleted("Silakan pilih berkas CSV dari penyimpanan perangkat") }
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 14.dp),
+                    .padding(vertical = 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.UploadFile,
-                    contentDescription = null,
-                    tint = IxhInk,
-                    modifier = Modifier.size(36.dp)
+                IxhCircleIcon(
+                    icon = Icons.Outlined.UploadFile,
+                    bgColor = IxhYellow,
+                    size = 54.dp
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Pilih File CSV dari Perangkat",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
                     color = IxhInk
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Validasi format nomor WhatsApp (+62) dan username unik sebelum impor",
                     style = MaterialTheme.typography.bodySmall,
@@ -1734,11 +2214,21 @@ fun UserProblematicNumbersScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Nomor WA Bermasalah", onBack = onBack)
+
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Validasi Kontak",
+            title = "Pemeriksaan Nomor WA",
+            subtitle = "Nomor non-aktif atau STOP dilewati otomatis demi keamanan bot.",
+            iconType = IxhSystemIconType.BOT,
+            containerColor = if (problematic.isEmpty()) IxhGreenBg else IxhYellowLight,
+            accentWaveColor = if (problematic.isEmpty()) IxhGreen else IxhYellow
+        )
 
         IxhAlertBanner(
             text = "Nomor di bawah ini otomatis dilewati saat pengiriman massal agar akun Bot WhatsApp tidak terkena blokir.",
@@ -1753,13 +2243,14 @@ fun UserProblematicNumbersScreen(
             )
         } else {
             problematic.forEach { u ->
-                val (reason, tone) = when (u.waStatus) {
-                    WaNumberStatus.TIDAK_DI_WA.name -> "Nomor tidak aktif / tidak terdaftar di WhatsApp" to ChipTone.RED
-                    WaNumberStatus.BERHENTI.name -> "Siswa membalas STOP (${u.waStopTimestamp.ifBlank { "Baru saja" }})" to ChipTone.NEUTRAL
-                    else -> "Nomor baru — belum pernah dites kirim" to ChipTone.YELLOW
+                val (reason, tone, stripe) = when (u.waStatus) {
+                    WaNumberStatus.TIDAK_DI_WA.name -> Triple("Nomor tidak aktif / tidak terdaftar di WhatsApp", ChipTone.RED, IxhRed)
+                    WaNumberStatus.BERHENTI.name -> Triple("Siswa membalas STOP (${u.waStopTimestamp.ifBlank { "Baru saja" }})", ChipTone.NEUTRAL, IxhInk)
+                    else -> Triple("Nomor baru — belum pernah dites kirim", ChipTone.YELLOW, IxhYellow)
                 }
                 IxhCard(
                     backgroundColor = IxhWhite,
+                    leftStripeColor = stripe,
                     onClick = { onOpenUserDetail(u) }
                 ) {
                     Row(
@@ -1771,12 +2262,13 @@ fun UserProblematicNumbersScreen(
                             Text(
                                 text = "${u.absenNo}. ${u.fullName}",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 color = IxhInk
                             )
                             Text(
                                 text = u.phoneWa,
                                 style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
                                 color = IxhInk
                             )
                             Text(
@@ -1785,6 +2277,7 @@ fun UserProblematicNumbersScreen(
                                 color = IxhTextSecondary
                             )
                         }
+                        Spacer(modifier = Modifier.width(8.dp))
                         IxhStatusChip(text = u.waStatus, tone = tone)
                     }
                 }
@@ -1825,9 +2318,10 @@ fun ClassSettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Pengaturan Kelas",
@@ -1835,12 +2329,19 @@ fun ClassSettingsScreen(
             rightContent = {
                 if (isAdmin) {
                     IxhStatusChip(
-                        text = if (viewAsPengurusDemo) "Mode Admin" else "Lihat Mode Pengurus",
+                        text = if (viewAsPengurusDemo) "Mode Admin" else "Mode Pengurus",
                         tone = ChipTone.OUTLINE_YELLOW,
                         modifier = Modifier.clickable { viewAsPengurusDemo = !viewAsPengurusDemo }
                     )
                 }
             }
+        )
+
+        IxhOrganicModuleBanner(
+            eyebrowTag = "Konfigurasi Kelas",
+            title = settings.className,
+            subtitle = "Tahun Ajaran ${settings.schoolYear} • Target Hadir $safeThreshold%",
+            iconType = IxhSystemIconType.BERANDA
         )
 
         if (!canEdit) {
@@ -1852,66 +2353,71 @@ fun ClassSettingsScreen(
             )
         }
 
-        IxhCard(backgroundColor = IxhWhite) {
-            Text("IDENTITAS KELAS & TAHUN AJARAN", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
-            Spacer(modifier = Modifier.height(6.dp))
-            OutlinedTextField(
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
+            Text(
+                text = "IDENTITAS KELAS & TAHUN AJARAN",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            IxhStyledTextField(
                 value = className,
                 onValueChange = { if (canEdit) className = it },
-                enabled = canEdit,
-                label = { Text("Nama Kelas") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Nama Kelas"
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(10.dp))
+            IxhStyledTextField(
                 value = schoolYear,
                 onValueChange = { if (canEdit) schoolYear = it },
-                enabled = canEdit,
-                label = { Text("Tahun Ajaran & Semester") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Tahun Ajaran & Semester"
             )
         }
 
-        IxhCard(backgroundColor = IxhWhite) {
-            Text("ATURAN KAS MINGGUAN BAWAAN", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
-            Spacer(modifier = Modifier.height(6.dp))
-            OutlinedTextField(
+        IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
+            Text(
+                text = "ATURAN KAS MINGGUAN BAWAAN",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            IxhStyledTextField(
                 value = weeklyKas,
                 onValueChange = { if (canEdit) weeklyKas = it.filter { c -> c.isDigit() } },
-                enabled = canEdit,
-                label = { Text("Nominal Kas Bawaan (Rp)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Nominal Kas Bawaan (Rp)"
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Hari Jatuh Tempo Bawaan", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "HARI JATUH TEMPO BAWAAN",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk
+            )
+            Spacer(modifier = Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 days.forEach { d ->
                     val sel = selectedDueDay == d
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(if (sel) IxhYellow else IxhSurfaceMuted)
-                            .border(1.dp, if (sel) IxhInk else IxhBorder, RoundedCornerShape(8.dp))
-                            .clickable(enabled = canEdit) { selectedDueDay = d }
-                            .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(d, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = IxhInk)
-                    }
+                    IxhSculptedFilterChip(
+                        label = d,
+                        selected = sel,
+                        onClick = { if (canEdit) selectedDueDay = d },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Pengingat WA H-1 Jatuh Tempo", style = MaterialTheme.typography.bodySmall, color = IxhInk)
+                Text(
+                    text = "Pengingat WA H-1 Jatuh Tempo",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = IxhInk
+                )
                 IxhNeubrutalToggle(
                     checked = autoReminder,
                     onCheckedChange = { autoReminder = it },
@@ -1920,8 +2426,13 @@ fun ClassSettingsScreen(
             }
         }
 
-        IxhCard(backgroundColor = IxhWhite) {
-            Text("BATAS AMAN KEHADIRAN SISWA", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
+        IxhCard(backgroundColor = IxhYellowLight, borderColor = IxhInk, hasHardShadow = true) {
+            Text(
+                text = "BATAS AMAN KEHADIRAN SISWA",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk
+            )
             Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1929,7 +2440,7 @@ fun ClassSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Target Minimal Kehadiran", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = IxhInk)
+                    Text("Target Minimal Kehadiran", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.ExtraBold, color = IxhInk)
                     Text("Di bawah batas ini muncul peringatan di profil siswa", style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)
                 }
                 IxhStatusChip(text = "$safeThreshold%", tone = ChipTone.GREEN)
@@ -1979,10 +2490,10 @@ fun ActivityLogsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IxhCream)
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(
             title = "Audit Log Aktivitas",
@@ -1991,7 +2502,7 @@ fun ActivityLogsScreen(
                 if (isAdmin) {
                     IxhStatusChip(
                         text = if (showLockedPengurusDemo) "Mode Admin" else "Cek Kunci Pengurus",
-                        tone = ChipTone.NEUTRAL,
+                        tone = ChipTone.OUTLINE_YELLOW,
                         modifier = Modifier.clickable { showLockedPengurusDemo = !showLockedPengurusDemo }
                     )
                 }
@@ -2001,7 +2512,8 @@ fun ActivityLogsScreen(
         if (showLockedPengurusDemo) {
             IxhCard(
                 backgroundColor = IxhWhite,
-                contentPadding = PaddingValues(20.dp)
+                hasHardShadow = true,
+                contentPadding = PaddingValues(22.dp)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -2011,16 +2523,16 @@ fun ActivityLogsScreen(
                         icon = Icons.Outlined.Lock,
                         bgColor = IxhRedBg,
                         iconTint = IxhRed,
-                        size = 48.dp
+                        size = 54.dp
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Halaman Khusus Admin",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = IxhInk
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = "Audit Log mencatat seluruh operasi penting (CREATE, UPDATE, DELETE, BACKUP, RESTORE, ROLE_CHANGE) secara permanen dan hanya dapat diakses oleh Admin.",
                         style = MaterialTheme.typography.bodySmall,
@@ -2030,6 +2542,13 @@ fun ActivityLogsScreen(
                 }
             }
         } else {
+            IxhOrganicModuleBanner(
+                eyebrowTag = "Jejak Audit Permanen",
+                title = "Audit Log Kelas IX-H",
+                subtitle = "${logs.size} entri tercatat • Tidak dapat diubah atau dihapus.",
+                iconType = IxhSystemIconType.PROFIL
+            )
+
             IxhAlertBanner(
                 title = "Jejak Audit Permanen (Tanpa Tombol Edit/Hapus)",
                 text = "Log aktivitas tidak dapat diubah atau dihapus oleh siapa pun (termasuk Admin) dan tidak pernah menyimpan password maupun token rahasia.",
@@ -2037,59 +2556,32 @@ fun ActivityLogsScreen(
                 icon = Icons.Outlined.Lock
             )
 
-            // Search Input for Audit Log
-            OutlinedTextField(
+            IxhStyledTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Cari pelaku, aksi, target, atau jenis operasi...") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = "Cari Log",
-                        tint = IxhInk
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("audit_log_search_input"),
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = IxhWhite,
-                    unfocusedContainerColor = IxhWhite
-                )
+                placeholder = "Cari pelaku, aksi, target, atau jenis operasi...",
+                leadingIcon = Icons.Outlined.Search,
+                testTag = "audit_log_search_input"
             )
 
-            // Role Filter Tabs
             IxhSegmentedTabs(
                 tabs = roles,
                 selectedIndex = filterRole,
                 onTabSelected = { filterRole = it }
             )
 
-            // Category Filter Pills
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 cats.forEachIndexed { idx, label ->
-                    val sel = filterCat == idx
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (sel) IxhInk else IxhSurfaceMuted)
-                            .clickable { filterCat = idx }
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                    ) {
-                        Text(
-                            text = label,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (sel) IxhWhite else IxhTextSecondary
-                        )
-                    }
+                    IxhSculptedFilterChip(
+                        label = label,
+                        selected = filterCat == idx,
+                        onClick = { filterCat = idx }
+                    )
                 }
             }
 
@@ -2115,15 +2607,16 @@ fun ActivityLogsScreen(
                 )
             } else {
                 filtered.forEach { log ->
-                    val tone = when (log.category) {
-                        "Lunas", "Sistem", "Backup" -> ChipTone.GREEN
-                        "Hapus", "Berhenti" -> ChipTone.RED
-                        "Role" -> ChipTone.YELLOW
-                        else -> ChipTone.BLUE
+                    val (tone, stripe) = when (log.category) {
+                        "Lunas", "Sistem", "Backup" -> ChipTone.GREEN to IxhGreen
+                        "Hapus", "Berhenti" -> ChipTone.RED to IxhRed
+                        "Role" -> ChipTone.YELLOW to IxhYellow
+                        else -> ChipTone.BLUE to Color(0xFF1D4ED8)
                     }
                     val statusTone = if (log.statusLabel == "GAGAL") ChipTone.RED else ChipTone.GREEN
                     IxhCard(
                         backgroundColor = IxhWhite,
+                        leftStripeColor = stripe,
                         onClick = { onOpenLogDetail(log) }
                     ) {
                         Row(
@@ -2139,14 +2632,15 @@ fun ActivityLogsScreen(
                             Text(
                                 text = log.timeWib,
                                 style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
                                 color = IxhTextSecondary
                             )
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(7.dp))
                         Text(
                             text = "${log.actorName} (${log.actorRole}) — ${log.actionTitle}",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = IxhInk
                         )
                         Text(
@@ -2175,9 +2669,10 @@ fun ActivityLogDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .ixhOrganicScreenBackdrop()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         IxhSubScreenTopBar(title = "Detail Log Aktivitas", onBack = onBack)
 
@@ -2189,18 +2684,20 @@ fun ActivityLogDetailScreen(
             )
         } else {
             IxhCard(
-                backgroundColor = IxhYellowLight,
-                borderColor = IxhInk
+                backgroundColor = IxhYellow,
+                borderColor = IxhInk,
+                hasHardShadow = true,
+                contentPadding = PaddingValues(16.dp)
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    IxhStatusChip(text = log.category, tone = ChipTone.OUTLINE_YELLOW)
+                    IxhStatusChip(text = log.category, tone = ChipTone.NEUTRAL)
                     IxhStatusChip(text = log.operationType, tone = ChipTone.BLUE)
                     IxhStatusChip(
                         text = log.statusLabel,
                         tone = if (log.statusLabel == "GAGAL") ChipTone.RED else ChipTone.GREEN
                     )
                 }
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = log.actionTitle,
                     style = MaterialTheme.typography.titleLarge,
@@ -2210,43 +2707,53 @@ fun ActivityLogDetailScreen(
                 Text(
                     text = "${log.dayHeader} • ${log.timeWib}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = IxhTextSecondary
+                    fontWeight = FontWeight.Bold,
+                    color = IxhInk.copy(alpha = 0.8f)
                 )
             }
 
-            IxhCard(backgroundColor = IxhWhite) {
-                Text("PERBANDINGAN SEBELUM & SESUDAH", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            IxhSculptedSectionHeader(title = "Perbandingan Nilai (Diff)")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                val diffShape = RoundedCornerShape(topStart = 18.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 20.dp)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .neubrutalShadow(enabled = true, cornerRadius = 14.dp, offsetY = 3.dp, offsetX = 2.dp)
+                        .clip(diffShape)
+                        .background(IxhRedBg, diffShape)
+                        .border(2.2.dp, IxhInk, diffShape)
+                        .padding(12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(IxhRedBg)
-                            .padding(10.dp)
-                    ) {
-                        Text("SEBELUM", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = IxhRed)
-                        Text(log.beforeValue, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = IxhInk)
-                    }
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(IxhGreenBg)
-                            .padding(10.dp)
-                    ) {
-                        Text("SESUDAH", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = IxhGreenText)
-                        Text(log.afterValue, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = IxhInk)
-                    }
+                    Text("SEBELUM", fontSize = 9.5.sp, fontWeight = FontWeight.ExtraBold, color = IxhRed)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(log.beforeValue, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = IxhInk)
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .neubrutalShadow(enabled = true, cornerRadius = 14.dp, offsetY = 3.dp, offsetX = 2.dp)
+                        .clip(diffShape)
+                        .background(IxhGreenBg, diffShape)
+                        .border(2.2.dp, IxhInk, diffShape)
+                        .padding(12.dp)
+                ) {
+                    Text("SESUDAH", fontSize = 9.5.sp, fontWeight = FontWeight.ExtraBold, color = IxhGreenText)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(log.afterValue, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = IxhInk)
                 }
             }
 
-            IxhCard(backgroundColor = IxhWhite) {
-                Text("INFORMASI PELAKU & PERANGKAT", style = MaterialTheme.typography.labelSmall, color = IxhTextSecondary)
-                Spacer(modifier = Modifier.height(6.dp))
+            IxhCard(backgroundColor = IxhWhite, hasHardShadow = true) {
+                Text(
+                    text = "INFORMASI PELAKU & PERANGKAT",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = IxhInk
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text("Pelaku: ${log.actorName} (${log.actorRole})", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = IxhInk)
                 Text("Target: ${log.targetUser}", style = MaterialTheme.typography.bodySmall, color = IxhInk)
                 Text("Alasan: ${log.reason}", style = MaterialTheme.typography.bodySmall, color = IxhTextSecondary)

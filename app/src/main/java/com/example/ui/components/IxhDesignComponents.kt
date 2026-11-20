@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +47,8 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,6 +66,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -163,6 +168,88 @@ fun Modifier.neubrutalShadow(
         )
     }
 }
+
+/**
+ * Unified Organic Cream Canvas Backdrop for every screen in IX-H HUB 1.0.
+ * Draws layered flowing golden-cream waves with subtle charcoal contour lines
+ * in a single lightweight Canvas pass.
+ */
+fun Modifier.ixhOrganicScreenBackdrop(
+    topWaveColor: Color = IxhYellowLight,
+    bottomWaveColor: Color = IxhYellow
+): Modifier = this
+    .background(IxhCream)
+    .drawBehind {
+        val w = size.width
+        val h = size.height
+
+        // Upper right flowing organic lobe
+        val topLobe = Path().apply {
+            moveTo(w * 0.28f, 0f)
+            cubicTo(
+                w * 0.42f, h * 0.08f,
+                w * 0.72f, h * 0.04f,
+                w, h * 0.17f
+            )
+            lineTo(w, 0f)
+            close()
+        }
+        drawPath(topLobe, color = topWaveColor.copy(alpha = 0.65f))
+
+        val topContour = Path().apply {
+            moveTo(w * 0.28f, 0f)
+            cubicTo(
+                w * 0.42f, h * 0.08f,
+                w * 0.72f, h * 0.04f,
+                w, h * 0.17f
+            )
+        }
+        drawPath(
+            path = topContour,
+            color = IxhInk.copy(alpha = 0.09f),
+            style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
+        )
+
+        // Mid-left soft organic pocket
+        val midPocket = Path().apply {
+            moveTo(0f, h * 0.34f)
+            cubicTo(
+                w * 0.22f, h * 0.39f,
+                w * 0.24f, h * 0.50f,
+                0f, h * 0.56f
+            )
+            close()
+        }
+        drawPath(midPocket, color = bottomWaveColor.copy(alpha = 0.13f))
+
+        // Lower flowing organic S-curve
+        val bottomLobe = Path().apply {
+            moveTo(0f, h * 0.87f)
+            cubicTo(
+                w * 0.30f, h * 0.81f,
+                w * 0.66f, h * 0.94f,
+                w, h * 0.84f
+            )
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(bottomLobe, color = topWaveColor.copy(alpha = 0.55f))
+
+        val bottomContour = Path().apply {
+            moveTo(0f, h * 0.87f)
+            cubicTo(
+                w * 0.30f, h * 0.81f,
+                w * 0.66f, h * 0.94f,
+                w, h * 0.84f
+            )
+        }
+        drawPath(
+            path = bottomContour,
+            color = IxhInk.copy(alpha = 0.09f),
+            style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
+        )
+    }
 
 /**
  * Komponen Maskot Blob 3D-Glossy dengan animasi berbasis state (bukan infinite loop permanen),
@@ -614,20 +701,19 @@ fun IxhCard(
 ) {
     val design = LocalIxhDesign.current
     val isGlass = design.style == VisualThemeStyle.LIQUID_GLASS
-    // Asymmetric sculpted corners give every card an intentional organic-neubrutalist silhouette
     val shape = if (hasHardShadow) {
-        RoundedCornerShape(topStart = 22.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 24.dp)
+        RoundedCornerShape(topStart = 24.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 26.dp)
     } else {
-        RoundedCornerShape(topStart = 18.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 20.dp)
+        RoundedCornerShape(topStart = 19.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp)
     }
     val resolvedBorderColor = borderColor ?: if (isGlass) IxhGlassBorder else IxhInk
     val borderWidth = when {
-        isGlass -> 1.2.dp
-        hasHardShadow -> 2.4.dp
-        else -> 1.9.dp
+        isGlass -> 1.4.dp
+        hasHardShadow -> 2.6.dp
+        else -> 2.2.dp
     }
-    val shadowOffset = if (hasHardShadow) 4.dp else 2.2.dp
-    val shadowOffsetX = if (hasHardShadow) 3.dp else 1.6.dp
+    val shadowOffset = if (hasHardShadow) 4.6.dp else 3.dp
+    val shadowOffsetX = if (hasHardShadow) 3.4.dp else 2.2.dp
 
     val clickMod = if (onClick != null) {
         Modifier.clickable(onClick = onClick)
@@ -638,26 +724,26 @@ fun IxhCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .neubrutalShadow(
                 enabled = !isGlass,
                 cornerRadius = 18.dp,
                 offsetY = shadowOffset,
                 offsetX = shadowOffsetX,
-                shadowColor = IxhInk
+                shadowColor = resolvedBorderColor
             )
             .clip(shape)
             .background(backgroundColor, shape)
             .drawBehind {
-                // Subtle organic wave accent in the bottom-right corner of yellow/featured cards
+                val w = size.width
+                val h = size.height
                 if (backgroundColor == IxhYellow || backgroundColor == IxhYellowLight) {
-                    val w = size.width
-                    val h = size.height
-                    val wave = androidx.compose.ui.graphics.Path().apply {
-                        moveTo(w * 0.58f, h)
+                    val wave = Path().apply {
+                        moveTo(w * 0.56f, h)
                         cubicTo(
-                            w * 0.70f, h * 0.74f,
-                            w * 0.86f, h * 0.62f,
-                            w, h * 0.44f
+                            w * 0.68f, h * 0.72f,
+                            w * 0.85f, h * 0.60f,
+                            w, h * 0.42f
                         )
                         lineTo(w, h)
                         close()
@@ -665,11 +751,28 @@ fun IxhCard(
                     drawPath(
                         path = wave,
                         color = if (backgroundColor == IxhYellow) {
-                            Color(0xFFFFE066).copy(alpha = 0.65f)
+                            Color(0xFFFFE066).copy(alpha = 0.72f)
                         } else {
-                            IxhYellow.copy(alpha = 0.28f)
+                            IxhYellow.copy(alpha = 0.30f)
                         }
                     )
+                    val contour = Path().apply {
+                        moveTo(w * 0.56f, h)
+                        cubicTo(w * 0.68f, h * 0.72f, w * 0.85f, h * 0.60f, w, h * 0.42f)
+                    }
+                    drawPath(
+                        path = contour,
+                        color = IxhInk.copy(alpha = 0.14f),
+                        style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round)
+                    )
+                } else if (backgroundColor == IxhWhite) {
+                    val cornerWave = Path().apply {
+                        moveTo(w * 0.74f, h)
+                        cubicTo(w * 0.84f, h * 0.80f, w * 0.92f, h * 0.72f, w, h * 0.58f)
+                        lineTo(w, h)
+                        close()
+                    }
+                    drawPath(cornerWave, color = IxhYellowLight.copy(alpha = 0.38f))
                 }
             }
             .border(borderWidth, resolvedBorderColor, shape)
@@ -678,15 +781,15 @@ fun IxhCard(
         if (leftStripeColor != null) {
             Box(
                 modifier = Modifier
-                    .width(8.dp)
-                    .height(82.dp)
+                    .width(9.dp)
+                    .fillMaxHeight()
                     .background(leftStripeColor)
                     .drawBehind {
                         drawLine(
                             color = IxhInk,
                             start = Offset(size.width, 0f),
                             end = Offset(size.width, size.height),
-                            strokeWidth = 2.dp.toPx()
+                            strokeWidth = 2.2.dp.toPx()
                         )
                     }
             )
@@ -723,8 +826,8 @@ fun IxhPrimaryButton(
             .neubrutalShadow(
                 enabled = !isGlass && enabled,
                 cornerRadius = 18.dp,
-                offsetY = 4.dp,
-                offsetX = 3.dp
+                offsetY = 4.2.dp,
+                offsetX = 3.2.dp
             )
             .clip(shape)
             .background(bgColor, shape)
@@ -732,17 +835,17 @@ fun IxhPrimaryButton(
                 if (enabled) {
                     val w = size.width
                     val h = size.height
-                    val highlightWave = androidx.compose.ui.graphics.Path().apply {
+                    val highlightWave = Path().apply {
                         moveTo(0f, 0f)
                         lineTo(w * 0.42f, 0f)
                         cubicTo(w * 0.32f, h * 0.45f, w * 0.14f, h * 0.65f, 0f, h * 0.82f)
                         close()
                     }
-                    drawPath(highlightWave, color = Color(0xFFFFDE6A).copy(alpha = 0.55f))
+                    drawPath(highlightWave, color = Color(0xFFFFDE6A).copy(alpha = 0.62f))
                 }
             }
             .border(
-                width = if (isGlass) 0.dp else 2.4.dp,
+                width = if (isGlass) 0.dp else 2.6.dp,
                 color = if (isGlass) Color.Transparent else IxhInk,
                 shape = shape
             )
@@ -765,7 +868,9 @@ fun IxhPrimaryButton(
             style = MaterialTheme.typography.labelLarge,
             color = textColor,
             fontWeight = FontWeight.ExtraBold,
-            fontSize = 13.sp
+            fontSize = 13.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -798,15 +903,15 @@ fun IxhSecondaryButton(
             .neubrutalShadow(
                 enabled = !isGlass,
                 cornerRadius = 16.dp,
-                offsetY = 3.dp,
-                offsetX = 2.2.dp,
+                offsetY = 3.4.dp,
+                offsetX = 2.4.dp,
                 shadowColor = strokeColor
             )
             .clip(shape)
             .background(bgColor, shape)
-            .border(2.2.dp, strokeColor, shape)
+            .border(2.3.dp, strokeColor, shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 14.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -824,7 +929,9 @@ fun IxhSecondaryButton(
             style = MaterialTheme.typography.labelLarge,
             color = contentColor,
             fontWeight = FontWeight.ExtraBold,
-            fontSize = 12.5.sp
+            fontSize = 12.5.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -850,9 +957,10 @@ fun IxhStatusChip(
     val shape = RoundedCornerShape(topStart = 12.dp, topEnd = 8.dp, bottomStart = 8.dp, bottomEnd = 14.dp)
     Box(
         modifier = modifier
+            .neubrutalShadow(enabled = true, cornerRadius = 10.dp, offsetY = 1.8.dp, offsetX = 1.4.dp)
             .clip(shape)
             .background(bg, shape)
-            .border(1.6.dp, borderCol, shape)
+            .border(1.8.dp, borderCol, shape)
             .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -860,7 +968,9 @@ fun IxhStatusChip(
             text = text,
             fontSize = 10.5.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = fg
+            color = fg,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -1908,24 +2018,289 @@ fun IxhSculptedSectionHeader(
 }
 
 @Composable
+fun IxhOrganicWaveDivider(
+    modifier: Modifier = Modifier,
+    waveFillColor: Color = IxhYellowLight,
+    accentDotColor: Color = IxhYellow
+) {
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(14.dp)
+    ) {
+        val w = size.width
+        val h = size.height
+        val wave = Path().apply {
+            moveTo(0f, h * 0.55f)
+            cubicTo(w * 0.25f, h * 0.10f, w * 0.45f, h * 0.95f, w * 0.72f, h * 0.45f)
+            cubicTo(w * 0.86f, h * 0.20f, w * 0.94f, h * 0.65f, w, h * 0.42f)
+        }
+        val fillBand = Path().apply {
+            moveTo(0f, h * 0.55f)
+            cubicTo(w * 0.25f, h * 0.10f, w * 0.45f, h * 0.95f, w * 0.72f, h * 0.45f)
+            cubicTo(w * 0.86f, h * 0.20f, w * 0.94f, h * 0.65f, w, h * 0.42f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(fillBand, color = waveFillColor.copy(alpha = 0.45f))
+        drawPath(
+            path = wave,
+            color = IxhInk.copy(alpha = 0.28f),
+            style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
+        )
+        drawCircle(
+            color = accentDotColor,
+            radius = 4.dp.toPx(),
+            center = Offset(w * 0.50f, h * 0.56f)
+        )
+        drawCircle(
+            color = IxhInk,
+            radius = 4.dp.toPx(),
+            center = Offset(w * 0.50f, h * 0.56f),
+            style = Stroke(width = 1.4.dp.toPx())
+        )
+    }
+}
+
+@Composable
+fun IxhSculptedFilterChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    selectedBg: Color = IxhYellow,
+    selectedText: Color = IxhInk
+) {
+    val chipShape = RoundedCornerShape(topStart = 15.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 16.dp)
+    Box(
+        modifier = modifier
+            .neubrutalShadow(
+                enabled = true,
+                cornerRadius = 12.dp,
+                offsetY = if (selected) 2.6.dp else 1.8.dp,
+                offsetX = if (selected) 2.dp else 1.2.dp
+            )
+            .clip(chipShape)
+            .background(if (selected) selectedBg else IxhWhite, chipShape)
+            .border(if (selected) 2.2.dp else 1.8.dp, IxhInk, chipShape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = if (selected) selectedText else IxhInk,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+fun IxhSculptedFab(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    containerColor: Color = IxhYellow,
+    testTag: String? = null
+) {
+    val fabShape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp)
+    Box(
+        modifier = modifier
+            .size(56.dp)
+            .let { if (testTag != null) it.testTag(testTag) else it }
+            .neubrutalShadow(enabled = true, cornerRadius = 18.dp, offsetY = 4.5.dp, offsetX = 3.2.dp)
+            .clip(fabShape)
+            .background(containerColor, fabShape)
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                val sheen = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(w * 0.58f, 0f)
+                    cubicTo(w * 0.35f, h * 0.36f, w * 0.18f, h * 0.54f, 0f, h * 0.65f)
+                    close()
+                }
+                drawPath(sheen, color = Color.White.copy(alpha = 0.28f))
+            }
+            .border(2.5.dp, IxhInk, fabShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = IxhInk,
+            modifier = Modifier.size(25.dp)
+        )
+    }
+}
+
+@Composable
+fun IxhStyledTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String? = null,
+    placeholder: String? = null,
+    leadingIcon: ImageVector? = null,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    testTag: String? = null
+) {
+    val fieldShape = RoundedCornerShape(topStart = 18.dp, topEnd = 11.dp, bottomStart = 11.dp, bottomEnd = 20.dp)
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (label != null) {
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = IxhInk,
+                modifier = Modifier.padding(start = 4.dp, bottom = 5.dp)
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .neubrutalShadow(enabled = true, cornerRadius = 15.dp, offsetY = 2.8.dp, offsetX = 2.dp)
+                .clip(fieldShape)
+                .background(IxhWhite, fieldShape)
+                .border(2.2.dp, IxhInk, fieldShape)
+        ) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                placeholder = if (placeholder != null) {
+                    {
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = IxhTextSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                } else null,
+                leadingIcon = if (leadingIcon != null) {
+                    {
+                        Icon(
+                            imageVector = leadingIcon,
+                            contentDescription = null,
+                            tint = IxhInk,
+                            modifier = Modifier.size(19.dp)
+                        )
+                    }
+                } else null,
+                singleLine = singleLine,
+                minLines = minLines,
+                shape = fieldShape,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = IxhInk,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = IxhInk
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .let { if (testTag != null) it.testTag(testTag) else it }
+            )
+        }
+    }
+}
+
+@Composable
+fun IxhOrganicStatTile(
+    label: String,
+    value: String,
+    accentColor: Color = IxhYellow,
+    modifier: Modifier = Modifier,
+    valueColor: Color = IxhInk
+) {
+    val tileShape = RoundedCornerShape(topStart = 18.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 20.dp)
+    Column(
+        modifier = modifier
+            .neubrutalShadow(enabled = true, cornerRadius = 15.dp, offsetY = 3.dp, offsetX = 2.2.dp)
+            .clip(tileShape)
+            .background(IxhWhite, tileShape)
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                val topWave = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(w, 0f)
+                    lineTo(w, h * 0.30f)
+                    cubicTo(w * 0.65f, h * 0.44f, w * 0.32f, h * 0.16f, 0f, h * 0.34f)
+                    close()
+                }
+                drawPath(topWave, color = accentColor.copy(alpha = 0.55f))
+            }
+            .border(2.2.dp, IxhInk, tileShape)
+            .padding(horizontal = 10.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = valueColor,
+            maxLines = 1
+        )
+        Text(
+            text = label.uppercase(),
+            fontSize = 9.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = IxhTextSecondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
 fun IxhSubScreenTopBar(
     title: String,
     onBack: () -> Unit,
     rightContent: (@Composable RowScope.() -> Unit)? = null
 ) {
-    val backShape = RoundedCornerShape(topStart = 14.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 16.dp)
+    val barShape = RoundedCornerShape(topStart = 20.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 22.dp)
+    val backShape = RoundedCornerShape(topStart = 14.dp, topEnd = 9.dp, bottomStart = 9.dp, bottomEnd = 16.dp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 4.dp)
+            .neubrutalShadow(enabled = true, cornerRadius = 16.dp, offsetY = 2.8.dp, offsetX = 2.dp)
+            .clip(barShape)
+            .background(IxhWhite, barShape)
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                val accent = Path().apply {
+                    moveTo(w * 0.62f, 0f)
+                    lineTo(w, 0f)
+                    lineTo(w, h)
+                    lineTo(w * 0.78f, h)
+                    cubicTo(w * 0.72f, h * 0.52f, w * 0.68f, h * 0.25f, w * 0.62f, 0f)
+                    close()
+                }
+                drawPath(accent, color = IxhYellowLight.copy(alpha = 0.65f))
+            }
+            .border(2.2.dp, IxhInk, barShape)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(38.dp)
-                .neubrutalShadow(enabled = true, cornerRadius = 12.dp, offsetY = 2.5.dp, offsetX = 1.8.dp)
+                .neubrutalShadow(enabled = true, cornerRadius = 12.dp, offsetY = 2.2.dp, offsetX = 1.6.dp)
                 .clip(backShape)
-                .background(IxhYellowLight, backShape)
+                .background(IxhYellow, backShape)
                 .border(2.2.dp, IxhInk, backShape)
                 .clickable(onClick = onBack)
                 .testTag("subscreen_back_button"),
@@ -1941,7 +2316,7 @@ fun IxhSubScreenTopBar(
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.ExtraBold,
             color = IxhInk,
             maxLines = 1,
@@ -1949,6 +2324,7 @@ fun IxhSubScreenTopBar(
             modifier = Modifier.weight(1f)
         )
         if (rightContent != null) {
+            Spacer(modifier = Modifier.width(6.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 content = rightContent
